@@ -1,0 +1,4 @@
+; Build Binary Editor using AZTEC
+cc be
+as be.asm
+ln -o be.com be.o c.lib
