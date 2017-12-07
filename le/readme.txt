@@ -19,36 +19,46 @@
         ^D      Cursor one column right
         ^A      Cursor one word left
         ^F      Cursor one word right
+        ^J      Cursor to beginning of line
+        ^K      Cursor to end of line
         ^R      Cursor one page up
         ^C      Cursor one page down
+        ^T      Cursor to beginning of file 
+        ^V      Cursor to end of file
 
     Editing ---------------------------------------------------------------
     
+        ^O      Change tab width (2, 4, 6 or 8 spaces)
         ^I      Insert tab
         ^M      Insert CR/LF
         ^G      Delete character to the right
+        DEL     Delete character to the right
         ^H      Delete character to the left
         BACK    Delete character to the left
 
     File commands ---------------------------------------------------------
     
-        ^K N    New file
-        ^K O    Open file
-        ^K S    Save file
-        ^K A    Save file as
-        ^K Q    Quit without saving
-        ^K X    Exit with saving
+        ^W      Write file (save)
+        ^Q      Quit (exit)
 
-    On-screen commands ----------------------------------------------------
+    Functionality ---------------------------------------------------------
     
-        ^O ^T   Change tab width (2, 4, 6 or 8 spaces)
-
-    Quick commands --------------------------------------------------------
+        Lean Editor (LE) enables easy editing of small source code files.
+        Source code files are limited to 2000 lines with lengths less than
+        80 characters. The reasons are to simplify the design of LE and
+        that source code files should be small.
+        
+        To give more help for programmers, LE can be linked with the
+        Syntax Highlighter (SHL) module to highlight source code while
+        editing. This feature has been tested in the YAZE-AG simulator
+        running on an Intel i5 at 2.6 GHz. However, the performance will
+        probably be too low in a real CP/M environment with a Zilog Z80 or
+        Intel Intel 8080 CPU running at a few MHz. Just saying.
+        
+    Internals -------------------------------------------------------------
     
-        ^Q ^S   Cursor to beginning of line
-        ^Q ^D   Cursor to end of line
-        ^Q ^R   Cursor to beginning of file 
-        ^Q ^C   Cursor to end of file
+        LE is written for CP/M systems but can easily be ported to other
+        operating systems.
 
     -----------------------------------------------------------------------
 

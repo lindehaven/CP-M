@@ -36,12 +36,12 @@
 
 #define PROG_NAME   "Binary Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.0 2017-11-30"
+#define PROG_VERS   "v0.1.1 2017-12-07"
 #define PROG_SYST   "CP/M"
 
 #define WORDBITS    16                              /* # of bits in a word  */
 #define MAX_FNAME   20                              /* Max filename length  */
-#define MAX_WHERE   2040                            /* Max change info size */
+#define MAX_WHERE   2047                            /* Max change info size */
 #define MAX_BYTES   (MAX_WHERE * WORDBITS)          /* Max byte buffer size */
 
 #define ED_ROWS     16                              /* # of rows            */
@@ -72,7 +72,7 @@
 
 /* CP/M Keyboard */
 char *key[] = {
-    "Lindehaven  ",
+    "L.Lindehaven",
     "\x05",                 /* ^E  Cursor one row up                        */
     "\x18",                 /* ^X  Cursor one row down                      */
     "\x13",                 /* ^S  Cursor one column left                   */
@@ -80,10 +80,10 @@ char *key[] = {
     "\x12",                 /* ^R  Cursor one page up                       */
     "\x03",                 /* ^C  Cursor one page down                     */
     "\x14",                 /* ^T  Cursor to beginning of byte buffer (top) */
-    "\x02",                 /* ^B  Cursor to end of byte buffer (bottom)    */
+    "\x16",                 /* ^V  Cursor to end of byte buffer (bottom)    */
     "\x01",                 /* ^A  Set edit mode HEX                        */
     "\x06",                 /* ^F  Set edit mode ASCII                      */
-    "\x16",                 /* ^V  Toggle edit mode (ASCII/HEX)             */
+    "\x1a",                 /* ^Z  Toggle edit mode (ASCII/HEX)             */
     "\x17",                 /* ^W  Write byte buffer to file (save)         */
     "\x11",                 /* ^Q  Quit                                     */
     "\x00",                 /* Reserved for future use                      */
@@ -99,10 +99,10 @@ char *help[] = {
    "^R Page up     ",
    "^C Page down   ",
    "^T Top         ",
-   "^B Bottom      ",
+   "^V Bottom      ",
    "^A HEX mode    ",
    "^F ASCII mode  ",
-   "^V Toggle mode ",
+   "^Z Toggle mode ",
    "^W Write file  ",
    "^Q Quit        ",
    "               ",
@@ -110,17 +110,17 @@ char *help[] = {
    "               "
 };
 
-char fname[MAX_FNAME];      /* Filename                             */
-int eatop = 0;              /* Address on top row in editor         */
-int aoffs = 0x0100;         /* Offset when displaying address       */
-int erow = 0;               /* Row in editor                        */
-int ecol = 0;               /* Column in editor                     */
-int eascii = 0;             /* Edit mode: 0 (HEX) or 1 (ASCII)      */
-int bcurr = 0;              /* Current position in byte buffer      */
-int bsize = 0;              /* Size of byte buffer                  */
-int bchanges = 0;           /* # of changes made in byte buffer     */
-int bwhere[MAX_WHERE];      /* Where changes have been made         */
-char bbuff[MAX_BYTES];      /* Byte buffer (maximum 32767 bytes)    */
+char fname[MAX_FNAME];      /* Filename                                     */
+int eatop = 0;              /* Address on top row in editor                 */
+int aoffs = 0x0100;         /* Offset when displaying address               */
+int erow = 0;               /* Row in editor                                */
+int ecol = 0;               /* Column in editor                             */
+int eascii = 0;             /* Edit mode: 0 (HEX) or 1 (ASCII)              */
+int bcurr = 0;              /* Current position in byte buffer              */
+int bsize = 0;              /* Size of byte buffer                          */
+int bchanges = 0;           /* # of changes made in byte buffer             */
+int bwhere[MAX_WHERE];      /* Where changes have been made                 */
+char bbuff[MAX_BYTES];      /* Byte buffer (maximum 32767 bytes)            */
 
 
 /* PROGRAM ---------------------------------------------------------------- */
@@ -141,7 +141,7 @@ int main(argc, argv) int argc, argv[]; {
             aoffs = atoi(argv[2]);
         }
     } else {
-        printf("Usage: %s filename.ext [address offset]", argv[0]);
+        printf("Usage: be filename.ext [address offset]");
         return -1;
     }
     scrClr();
@@ -170,9 +170,9 @@ int edLoop() {
             rowUp();
         else if (ch == *key[2])
             rowDown();
-        else if (ch == *key[3])
+        else if (ch == *key[3] || ch == 127)
             colLeft();
-        else if (ch == *key[4])
+        else if (ch == *key[4] || ch == 9)
             colRight();
         else if (ch == *key[5])
             pageUp();
@@ -348,19 +348,33 @@ rowDown() {
 
 /* Move cursor one column left */
 colLeft() {
-    if (bcurr > 0 && ecol > 0) {
-        bcurr--;
-        ecol--;
-        edPosCur();
+    if (bcurr > 0) {
+        if (ecol > 0) {
+            bcurr--;
+            ecol--;
+            edPosCur();
+        } else if (bcurr >= ED_COLS) {
+            bcurr--;
+            ecol = ED_COLS-1;
+            erow--;
+            edPosCur();
+        }
     }
 }
 
 /* Move cursor one column right */
 colRight() {
-    if (bcurr < bsize && ecol < ED_COLS-1) {
-        bcurr++;
-        ecol++;
-        edPosCur();
+    if (bcurr < bsize) {
+        if (ecol < ED_COLS-1) {
+            bcurr++;
+            ecol++;
+            edPosCur();
+        } else if (bcurr < bsize - ED_COLS) {
+            bcurr++;
+            ecol = 0;
+            erow++;
+            edPosCur();
+        }
     }
 }
 
@@ -593,3 +607,4 @@ keyin2:
         mov         l,a
         ret
 #endasm
+

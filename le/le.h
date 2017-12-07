@@ -41,10 +41,15 @@
 #define KEY_CRT       4     /* ^D       Cursor one column right             */
 #define KEY_WLT       1     /* ^A       Cursor one word left                */
 #define KEY_WRT       6     /* ^F       Cursor one word right               */
+#define KEY_LBEG     10     /* ^J       Cursor to beginning of line         */
+#define KEY_LEND     11     /* ^K       Cursor to end of line               */
 #define KEY_PUP      18     /* ^R       Cursor one page up                  */
 #define KEY_PDN       3     /* ^C       Cursor one page down                */
+#define KEY_FBEG     20     /* ^T       Cursor to beginning of file         */
+#define KEY_FEND     22     /* ^V       Cursor to end of file               */
 
 /* Editing ---------------------------------------------------------------- */
+#define KEY_TABW     15     /* ^O       Change tab width (2/4/6/8 spaces)   */
 #define KEY_TAB       9     /* ^I       Insert tab                          */
 #define KEY_LNEW     13     /* ^M       Insert CR/LF                        */
 #define KEY_DEL       7     /* ^G       Delete character to the right       */
@@ -52,21 +57,6 @@
 #define KEY_BS      127     /* BACK     Delete character to the left        */
 
 /* File commands ---------------------------------------------------------- */
-#define KEY_FILE     11     /* ^K       Opens file commands                 */
-#define KEY_FNEW    'N'     /* ^K N     New file                            */
-#define KEY_FOPEN   'O'     /* ^K O     Open file                           */
-#define KEY_FSAVE   'S'     /* ^K S     Save file                           */
-#define KEY_FSAS    'A'     /* ^K A     Save file as                        */
-#define KEY_FEXIT   'X'     /* ^K X     Save file and exit                  */
-#define KEY_FQUIT   'Q'     /* ^K Q     Exit without saving                 */
+#define KEY_FSAVE    23     /* ^W       Write file (save)                   */
+#define KEY_FQUIT    17     /* ^Q       Quit (exit)                         */
 
-/* On-screen commands ----------------------------------------------------- */
-#define KEY_ONSCR    15     /* ^O       Starts on-screen commands           */
-#define KEY_OTAB     20     /* ^O ^T    Set tab width                       */
-
-/* Quick commands --------------------------------------------------------- */
-#define KEY_QUICK    17     /* ^Q       Starts quick commands               */
-#define KEY_QLBEG    19     /* ^Q ^S    Cursor to beginning of line         */
-#define KEY_QLEND     4     /* ^Q ^D    Cursor to end of line               */
-#define KEY_QFBEG    18     /* ^Q ^R    Cursor to beginning of file         */
-#define KEY_QFEND     3     /* ^Q ^C    Cursor to end of file               */
