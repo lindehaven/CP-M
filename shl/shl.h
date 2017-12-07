@@ -29,22 +29,24 @@
  *
  */
 
-#define SH_FAIL     -1
-#define SH_DONE     0
+#define SHL_FAIL    -1
+#define SHL_DONE    0
 
 /* int shl_set_language(char *lang_file);
- * Sets the desired language for highlighting.
- *  @lang_file File extension of the desired language, ex ".c".
- *  Returns SH_DONE if language is supported or SH_FAIL if language is not supported.
+ * Sets the desired language for parsing and highlighting.
+ *  @lang_file File name with file extension for the desired language.
+ *  Returns SHL_DONE if language is supported or SHL_FAIL if language is
+ *  not supported.
  */
 extern int shl_set_language();
 
 /* int shl_highlight(char *buf_b, char *buf_e, char *buf_p, int rows);
- * Prints highlighted text on screen.
+ * Parses buffer and prints highlighted string on screen.
  *  @buf_b Points to beginning of buffer.
  *  @buf_e Points to end of buffer.
  *  @buf_p Points to part of buffer where the printing shall start.
- *  @rows Maximum number of rows to print.
- *  Returns SH_DONE when done or SH_FAIL if failed or language has not been set.
+ *  @rows  Maximum number of rows to print.
+ *  Returns SHL_DONE when done or SHL_FAIL if failed or language has not
+ *  been set.
  */
 extern int shl_highlight();

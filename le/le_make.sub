@@ -1,5 +1,5 @@
 ; Build Lean Editor using AZTEC
-;cc le -DGRAPHICS -DSHL
-cc le -DGRAPHICS -DSHL
+;cc le.c -DSHL
+cc le.c -DSHL
 as le.asm
 ln -o le.com le.o shl.o strstr.o c.lib

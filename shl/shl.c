@@ -37,7 +37,7 @@
 
 #define PROG_NAME   "Syntax Highlighter"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.1 2017-11-27"
+#define PROG_VERS   "v0.1.2 2017-12-05"
 #define PROG_SYST   "CP/M"
 #define PROG_TERM   "ANSI Terminal"
 
@@ -106,14 +106,18 @@ struct shl_type shl_data[] = {
 
 #define SHL_LANGUAGES (sizeof(shl_data) / sizeof(shl_data[0]))
 
-int shl_language = SH_FAIL;
+int shl_language = SHL_FAIL;
 int state = SH_PLAIN;
 
-/* Sets the desired language for highlighting.
- *  @lang_file File extension of the desired language, ex ".c".
- *  Returns 0 if language is supported or -1 if language is not supported.
+/* int shl_set_language(char *lang_file);
+ * Sets the desired language for parsing and highlighting.
+ *  @lang_file File name with file extension for the desired language.
+ *  Returns SHL_DONE if language is supported or SHL_FAIL if language is
+ *  not supported.
  */
-int shl_set_language(lang_file) char *lang_file; {
+int shl_set_language(lang_file)
+char *lang_file;
+{
     struct shl_type *shl_p;
     int lang_ix, ext_ix, ext_len;
     char* str_p = NULL;
@@ -126,51 +130,49 @@ int shl_set_language(lang_file) char *lang_file; {
             str_p = strstr(lang_file, shl_p->file_ext[ext_ix]);
             if (str_p != NULL) {
                 ext_len = strlen(shl_p->file_ext[ext_ix]);
-                if (shl_p->file_ext[ext_ix][0] == '.' && str_p[ext_len] == '\0') {
+                if (shl_p->file_ext[ext_ix][0] == '.' &&
+                    str_p[ext_len] == '\0') {
                     shl_language = ext_ix;
-                    return shl_language;
+                    return SHL_DONE;
                 }
             }
             ext_ix++;
         }
     }
-    shl_language = SH_FAIL;
+    shl_language = SHL_FAIL;
     return shl_language;
 }
 
-/* Prints highlighted text on screen.
+/* int shl_highlight(char *buf_b, char *buf_e, char *buf_p, int rows);
+ * Parses buffer and prints highlighted string on screen.
  *  @buf_b Points to beginning of buffer.
  *  @buf_e Points to end of buffer.
  *  @buf_p Points to part of buffer where the printing shall start.
- *  @rows Maximum number of rows to print.
- *  Returns 0 when done or -1 if failed or language has not been set.
+ *  @rows  Maximum number of rows to print.
+ *  Returns SHL_DONE when done or SHL_FAIL if failed or language has not
+ *  been set.
  */
-int shl_highlight(buf_b, buf_e, buf_p, rows) char *buf_b, *buf_e, *buf_p; int rows; {
+int shl_highlight(buf_b, buf_e, buf_p, rows)
+char *buf_b, *buf_e, *buf_p; int rows;
+{
     int cur_row = 0;
     char *buf_s;
 
-    if (shl_language == SH_FAIL)
-        return SH_FAIL;
+    if (shl_language == SHL_FAIL)
+        return SHL_FAIL;
     else {
         buf_s = buf_b;
         while (buf_b <= buf_e && cur_row < rows) {
-
-            if (state == SH_MLC) {
-                while (++buf_b <= buf_e && !is_mlce(buf_b))
-                    ;
-                if (is_mlce(buf_b))
-                    state = SH_MLC_END;
-                while (++buf_b <= buf_e && is_mlce(buf_b))
-                    ;
-            }
-            else if (is_mlcb(buf_b) && state != SH_STR) {
+            if (is_mlcb(buf_b) && state != SH_STR || state == SH_MLC) {
                 state = SH_MLC;
                 while (++buf_b <= buf_e && !is_mlce(buf_b))
-                    ;
-                if (is_mlce(buf_b))
+                    set_mlcb(buf_b-1);
+                if (is_mlce(buf_b)) {
                     state = SH_MLC_END;
-                while (++buf_b <= buf_e && is_mlce(buf_b))
-                    ;
+                    clr_mlcb(buf_b);
+                    while (++buf_b <= buf_e && is_mlce(buf_b))
+                        clr_mlcb(buf_b);
+                }
             }
             else if (is_slc(buf_b) && state != SH_STR) {
                 state = SH_SLC;
@@ -195,8 +197,10 @@ int shl_highlight(buf_b, buf_e, buf_p, rows) char *buf_b, *buf_e, *buf_p; int ro
                 state = SH_KEYW;
                 buf_b++;
             }
-            else if (is_eol(buf_b) && state == SH_SLC) {
-                state = SH_PLAIN;
+            else if (is_eol(buf_b)) {
+                if (state == SH_SLC)
+                    state = SH_PLAIN;
+                cur_row++;
                 buf_b++;
             }
             else if (state == SH_MLC_END) {
@@ -231,15 +235,15 @@ int shl_highlight(buf_b, buf_e, buf_p, rows) char *buf_b, *buf_e, *buf_p; int ro
                         break;
                     default:
                         printf("%s", TE_RESET);
-                        printf("\nInternal error! Unknown state\n");
-                        return SH_FAIL;
+                        fprintf(stderr, "\nInternal error! Unknown state\n");
+                        return SHL_FAIL;
                         break;
                 }
             }
             buf_s = buf_b;
         }
         printf("%s", TE_RESET);
-        return SH_DONE;
+        return SHL_DONE;
     }
 }
 
@@ -249,22 +253,32 @@ int shl_highlight(buf_b, buf_e, buf_p, rows) char *buf_b, *buf_e, *buf_p; int ro
  *  @buf_b Points to the end of the string to print.
  *  Returns 0 when done.
  */
-int shl_print(marker, buf_s, buf_b) char *marker, *buf_s, *buf_b; {
+shl_print(marker, buf_s, buf_b) char *marker, *buf_s, *buf_b; {
     char *buf_c;
 
     printf("%s", marker);
     buf_c = buf_s;
     while (buf_c < buf_b) {
         if (*buf_c)
-            putchar(*buf_c);
+            putchar(*buf_c & 0x7f);
         buf_c++;
     }
-    return SH_DONE;
 }
 
-/* Returns 1 if beginning of multi-line comment */
+/* Set as multi-line comment */
+set_mlcb(buf) char *buf; {
+    *buf = *buf | 0x80;
+}
+
+/* Clear multi-line comment */
+clr_mlcb(buf) char *buf; {
+    *buf = *buf & 0x7f;
+}
+
+/* Returns 1 if multi-line comment */
 int is_mlcb(str) char *str; {
-    return (str[-1] != '\\' && (str[0] == '/' && str[1] == '*'));
+    return (str[-1] != '\\' && (str[0] == '/' && str[1] == '*') ||
+            (str[0] & 0x80));
 }
 
 /* Returns 1 if end of multi-line comment */
