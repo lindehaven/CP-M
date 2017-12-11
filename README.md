@@ -4,7 +4,7 @@
 
     I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C
     and assembler. My source code is unfortunately gone with the disks that
-    stored it on. But when I found and tried out some CP/M emulators I got
+    I stored it on. But when I found and tried out some CP/M emulators I got
     the urge to rewrite some of the code from memory. My memory is not too
     good so I think that I actually rewrite everything from scratch.
     
@@ -15,8 +15,10 @@
     wanted to have a source code editor with syntax highlighting. But I
     soo discovered that the Kilo editor was using so much of the memory
     that I decided to write my new source code editor and a variant of the
-    syntax highlighing from Kilo the editor.
-
+    syntax highlighing from the Kilo editor.
+    Ref: [Kilo editor|https://github.com/antirez/kilo]
+    
+    
 ## Binary Editor
 
     Binary Editor -- a small binary editor for programmers
@@ -60,8 +62,7 @@
         0x0030 - 0x00ff and you should edit those too while you are at it.
         Save a backup of the original BE.COM before you start editing.
         
-    -----------------------------------------------------------------------
-
+        
 ##     Lean Editor -- a small text editor for programmers
    
     Summary ---------------------------------------------------------------
@@ -92,9 +93,8 @@
     
         LE is written for CP/M systems but can easily be ported to other
         operating systems.
-
-    -----------------------------------------------------------------------
-
+        
+        
 ## Syntax Highlighter
 
     Summary ---------------------------------------------------------------
@@ -110,4 +110,4 @@
         state of multi-line comments to enable faster parsing in editors,
         for example Lean Editor.
     
-    -----------------------------------------------------------------------
+    
