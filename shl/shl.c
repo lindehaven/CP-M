@@ -310,3 +310,4 @@ int is_keyw(str) char *str; {
 int is_eol(str) char *str; {
     return (str[0] == '\r' || str[0] == '\n' || str[0] == '\0');
 }
+

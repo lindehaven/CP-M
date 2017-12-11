@@ -32,7 +32,7 @@
 /* Terminal settings ------------------------------------------------------ */
 #define TERM_ROWS    25     /* Number of rows on terminal screen.           */
 #define TERM_COLS    80     /* Number of columns on terminal screen.        */
-#define TERM_TABS     4     /* Number of spaces for each tab.               */
+#define TERM_TABS     8     /* Number of spaces for each tab (tab width).   */
 
 /* Cursor movement -------------------------------------------------------- */
 #define KEY_RUP       5     /* ^E       Cursor one row up                   */

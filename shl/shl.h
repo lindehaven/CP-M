@@ -50,3 +50,4 @@ extern int shl_set_language();
  *  been set.
  */
 extern int shl_highlight();
+

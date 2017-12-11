@@ -1,4 +1,6 @@
 ; Build Syntax Highlighter using AZTEC
 cc shl.h
 cc shl.c -DCOLOR
+;cc shl.c
 as shl.asm
+

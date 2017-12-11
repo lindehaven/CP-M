@@ -45,27 +45,30 @@
 
 #define PROG_NAME   "Lean Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.5 2017-12-07"
+#define PROG_VERS   "v0.1.6 2017-12-11"
 #define PROG_SYST   "CP/M"
 #define PROG_TERM   "ANSI Terminal"
 
 #define fputc       putc
 
-#define MAX_FNAME   22
+#define MAX_FNAME   16
 #define MAX_LINES   2000
+#define MAX_CBLINES 100
 
 #define SY_ROW1     0
 #define SY_ROWS     1
 #define SY_COLS     (TERM_COLS)
 #define SY_COLM     0
-#define SY_COLF     0
+#define SY_COLE     0
+#define SY_COLF     2
 #define SY_COLI     (SY_COLS - 35)
 
 #define ED_ROW1     SY_ROWS
 #define ED_ROWS     ((TERM_ROWS) - ED_ROW1)
 #define ED_COLS     (TERM_COLS)
-#define MAX_ED_COLS ((TERM_COLS) - 1)
+#define MAX_ED_COLS (TERM_COLS)
 #define ED_TABS     (TERM_TABS)
+#define MIN_ED_TABS 2
 #define MAX_ED_TABS 8
 
 
@@ -75,11 +78,10 @@
 char            fname[MAX_FNAME];
 
 /* Lines */
+char            *ln_dat;
 unsigned int    *lp_arr;
 int             lp_tot;
 int             lp_cur;
-char            *ln_dat;
-char            *ln_clp;
 unsigned int    ln_eds;
 
 /* Editor screen */
@@ -87,6 +89,11 @@ int             ed_row;
 int             ed_col;
 int             ed_tab;
 int             ed_sys_msg;
+
+/* TODO: Clipboard */
+char            *cbln_dat;
+unsigned int    *cblp_arr;
+int             cblp_tot;
 
 /* Syntax highlighting */
 #ifdef SHL
@@ -101,18 +108,23 @@ int main(argc, argv) int argc, argv[]; {
 
     if (edInitialize())
         return -1;
-    if (argc != 2) {
-        fprintf(stderr, "Usage: le [filename]");
-        return -1;
-    } else {
-        if (strlen(argv[1]) >= MAX_FNAME) {
-            fprintf(stderr, "Filename too long!");
+    if (argc > 1) {
+        if (argc == 3) {
+            ed_tab = atoi(argv[2]);
+            if (ed_tab < MIN_ED_TABS || ed_tab > MAX_ED_TABS)
+                ed_tab = TERM_TABS;
+        }
+        if (strlen(argv[1]) > MAX_FNAME - 1) {
+            fprintf(stderr, "Filename is too long.");
             return -1;
         } else {
             strcpy(fname, argv[1]);
             if (fileRead(fname))
                 return -1;
         }
+    } else {
+        fprintf(stderr, "Usage: le filename.ext [tab width]");
+        return -1;
     }
 #ifdef SHL
     ed_shl = shl_set_language(fname);
@@ -159,7 +171,7 @@ edLoop() {
                 toEOF();
                 break;
             case KEY_LNEW :
-                insCR();
+                insLine();
                 break;
             case KEY_DEL :
                 delChrRight();
@@ -169,7 +181,7 @@ edLoop() {
                 delChrLeft();
                 break;
             case KEY_FSAVE :
-                fileWrite(fname);
+                fileWrite();
                 ln_eds = 0;
                 edUpdAll();
                 break;
@@ -189,7 +201,7 @@ edLoop() {
 
 /* Edit current line */
 edGetLine() {
-    int i, t, ch, len, run, upd_lin, upd_sys, upd_pos, spc, old_len;
+    int i, ch, len, old_len, run, upd_sys, upd_pos, upd_lin, spc;
     char *buf;
 
     strcpy(ln_dat, lp_arr[lp_cur]);
@@ -210,6 +222,8 @@ edGetLine() {
         if (upd_sys) {
             upd_sys = 0;
             scrChrInverted();
+            scrPosCur(SY_ROW1, SY_COLE);
+            putchar(ln_eds ? '*' : ' ');
             scrPosCur(SY_ROW1, SY_COLI);
             printf("E:%05d  ", ln_eds);
             printf("T:%d  ", ed_tab);
@@ -238,8 +252,8 @@ edGetLine() {
                     --ed_col;
                     ++upd_sys;
                 } else if (lp_cur) {
-                    ed_col = 0x7fff;
                     ch = KEY_RUP;
+                    ed_col = 0x7fff;
                     run = 0;
                 }
                 ++upd_pos;
@@ -250,7 +264,8 @@ edGetLine() {
                     ++upd_sys;
                 } else if (lp_cur < lp_tot - 1) {
                     ch = KEY_RDN;
-                    ed_col = run = 0;
+                    ed_col = 0;
+                    run = 0;
                 }
                 ++upd_pos;
                 break;
@@ -269,8 +284,8 @@ edGetLine() {
                     }
                     ++upd_sys;
                 } else if (lp_cur) {
-                    ed_col = 0x7fff;
                     ch = KEY_RUP;
+                    ed_col = 0x7fff;
                     run = 0;
                 }
                 ++upd_pos;
@@ -278,7 +293,8 @@ edGetLine() {
             case KEY_WRT :
                 if (ed_col >= len && lp_cur < lp_tot - 1) {
                     ch = KEY_RDN;
-                    ed_col = run = 0;
+                    ed_col = 0;
+                    run = 0;
                 } else {
                     while (ln_dat[ed_col] && (ln_dat[ed_col] & 0x7f) != ' ')
                         ++ed_col;
@@ -315,25 +331,15 @@ edGetLine() {
                 ++upd_pos;
                 break;
             case KEY_TABW :
-                ed_tab += 2;
+                ed_tab++;
                 if (ed_tab > MAX_ED_TABS)
-                    ed_tab = 2;
+                    ed_tab = MIN_ED_TABS;
                 ++upd_sys;
                 ++upd_pos;
                 break;
             case KEY_TAB :
-                t = ed_tab - ed_col % ed_tab;
-                if (len + t < MAX_ED_COLS) {
-                    while (t--) {
-                        for (i = len; i > ed_col; --i) {
-                            putchar(' ');
-                            ln_dat[i] = ln_dat[i - 1];
-                        }
-                        ln_dat[ed_col++] = ' ';
-                        ln_dat[++len] = 0;
-                    }
-                    ++ln_eds;
-                }
+                len += tabToSpaces();
+                run = 0;
                 break;
             case KEY_LNEW :
                 if (lp_tot < MAX_LINES) {
@@ -347,8 +353,8 @@ edGetLine() {
                     --len;
                     ++upd_sys;
                     ++upd_lin;
-                    ++spc;
                     ++ln_eds;
+                    ++spc;
                 } else if (lp_cur < lp_tot -1) {
                     ++ln_eds;
                     run = 0;
@@ -363,8 +369,8 @@ edGetLine() {
                     --len;
                     ++upd_sys;
                     ++upd_lin;
-                    ++spc;
                     ++ln_eds;
+                    ++spc;
                     putchar('\b');
                 } else if (lp_cur) {
                     ++ln_eds;
@@ -410,18 +416,31 @@ int edInitialize() {
     int i;
 
     ln_dat = malloc(MAX_ED_COLS + 2);
-    ln_clp = malloc(MAX_ED_COLS + 1);
     lp_arr = malloc(MAX_LINES * 2);
-    if (!ln_dat || !ln_clp || !lp_arr) {
+    if (!ln_dat || !lp_arr) {
         fprintf(stderr, "Not enough memory!");
         return -1;
     }
-    *ln_clp = ln_eds = 0;
     for (i = 0; i < MAX_LINES; ++i)
         lp_arr[i] = NULL;
-    lp_tot = lp_cur = 0;
-    ed_row = ed_col = 0;
+    lp_tot = 0;
+    lp_cur = 0;
+    ln_eds = 0;    
+    ed_row = 0;
+    ed_col = 0;
     ed_tab = ED_TABS;
+
+    /* TODO: Clipboard */
+    cbln_dat = malloc(MAX_ED_COLS + 2);
+    cblp_arr = malloc(MAX_CBLINES * 2);
+    if (!cbln_dat || !cblp_arr) {
+        fprintf(stderr, "Not enough memory!");
+        return -1;
+    }
+    for (i = 0; i < MAX_CBLINES; ++i)
+        lp_arr[i] = NULL;
+    cblp_tot = 0;
+
     return 0;
 }
 
@@ -471,8 +490,26 @@ edUpdAll() {
     edUpd(0, lp_cur - ed_row);
 }
 
-/* Insert Carriage Return at cursor */
-insCR() {
+/* Insert spaces instead of tab at cursor */
+int tabToSpaces() {
+    int len, spc, i, j;
+
+    len = strlen(ln_dat);
+    spc = ed_tab - ed_col % ed_tab;
+    if (len + spc <= MAX_ED_COLS) {
+        for (i = 0; i < spc; ++i) {
+            for (j = len; j > ed_col; --j)
+                ln_dat[j] = ln_dat[j - 1];
+            ln_dat[ed_col++] = ' ';
+            ln_dat[++len] = 0;
+        }
+        ++ln_eds;
+    }
+    return spc;
+}
+
+/* Insert new line at cursor */
+insLine() {
     int left_len, right_len, i;
     char *p1, *p2;
 
@@ -690,85 +727,89 @@ sysPutFileName() {
 /* FILE ------------------------------------------------------------------- */
 
 /* Read file to lines */
-int fileRead(fn) char *fn; {
+int fileRead() {
     FILE *fp;
-    int len, i;
+    int line, col;
     char ch, *p;
 
-    if (!(fp = fopen(fn, "r"))) {
-        fprintf(stderr, "Cannot open %s for reading!", fn);
+    if (!(fp = fopen(fname, "r"))) {
+        fprintf(stderr, "Cannot open %s for reading!", fname);
         return -1;
     }
-    for (i = 0; i <= MAX_LINES; ++i) {
-        if (!fgets(ln_dat, MAX_ED_COLS + 2, fp))
-            break;
-        if (i >= MAX_LINES) {
+    for (line = 0; line <= MAX_LINES; ++line) {
+        ch = fgetc(fp) & 0x7f;
+        for (col = 0;
+             col < MAX_ED_COLS + 2 && ch != '\n' && ch != 0x1a && !feof(fp);
+             col++) {
+            ln_dat[col] = 0;
+            if (ch == '\r')
+                ;
+            else if (ch == '\t') {
+                ln_dat[col] = ' ';
+                ln_dat[col + 1] = 0;
+                ed_col = col + 1;
+                col += tabToSpaces();
+                ed_col = 0;
+            } else if (ch > 0x1f)
+                ln_dat[col] = ch;
+            else {
+                fprintf(stderr, "Unexpected control character in file!");
+                return -1;
+            }
+            ch = fgetc(fp) & 0x7f;
+        }
+        ln_dat[col] = 0;
+        if (line >= MAX_LINES) {
             fclose(fp);
             fprintf(stderr, "Too many lines in file (>%d)!", MAX_LINES);
             return -1;
         }
-        len = strlen(ln_dat);
-        if (ln_dat[len - 1] == '\n')
-            ln_dat[--len] = 0;
-        else if (len > MAX_ED_COLS) {
+        if (col > MAX_ED_COLS + 1) {
             fclose(fp);
             fprintf(stderr, "Too long lines in file (>%d)!", MAX_ED_COLS);
             return -1;
         }
-        if (!(lp_arr[i] = malloc(len + 1))) {
+        if (!(lp_arr[line] = malloc(col))) {
             fclose(fp);
             fprintf(stderr, "Too large file (not enough memory)!");
             return -1;
         }
-        strcpy(lp_arr[i], ln_dat);
+        strcpy(lp_arr[line], ln_dat);
+        if (ch == 0x1a || feof(fp)) {
+            line++;
+            break;
+        }
     }
     fclose(fp);
-    lp_tot = i;
+    lp_tot = line;
     if (!lp_tot) {
         p = malloc(1);
         *p = 0;
         lp_arr[lp_tot++] = p;
     }
-    for (i = 0; i < lp_tot; ++i) {
-        p = lp_arr[i];
-        while ((ch = (*p & 0x7f))) {
-            if (ch == '\t') {
-                *p = ' '; /* TODO: Replace TAB with n SPC */
-            } else if (ch < 0x20) {
-                fprintf(stderr, "Unexpected control character!");
-                return -1;
-            }
-            ++p;
-        }
-    }
     return 0;
 }
 
 /* Write lines to file */
-int fileWrite(fn) char *fn; {
+int fileWrite() {
     FILE *fp;
-    int i, err;
+    int line;
     char *p;
 
-    if (!(fp = fopen(fn, "w"))) {
+    if (!(fp = fopen(fname, "w"))) {
         errMsgOpen();
         return -1;
     }
-    for (i = err = 0; i < lp_tot; ++i) {
-        p = lp_arr[i];
+    for (line = 0; line < lp_tot - 1; line++) {
+        p = lp_arr[line];
         while (*p) {
             if (fputc((*p++ & 0x7f), fp) == EOF) {
-                ++err;
-                break;
+                fclose(fp);
+                errMsgWrite();
+                return -1;
             }
         }
-        if (!err) {
-            if (fputc('\r', fp) == EOF)
-                ++err;
-            if (fputc('\n', fp) == EOF)
-                ++err;
-        }
-        if (err) {
+        if (fputc('\r', fp) == EOF || fputc('\n', fp) == EOF) {
             fclose(fp);
             errMsgWrite();
             return -1;

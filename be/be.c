@@ -36,11 +36,11 @@
 
 #define PROG_NAME   "Binary Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.1 2017-12-07"
+#define PROG_VERS   "v0.1.2 2017-12-11"
 #define PROG_SYST   "CP/M"
 
 #define WORDBITS    16                              /* # of bits in a word  */
-#define MAX_FNAME   20                              /* Max filename length  */
+#define MAX_FNAME   16                              /* Max filename length  */
 #define MAX_WHERE   2047                            /* Max change info size */
 #define MAX_BYTES   (MAX_WHERE * WORDBITS)          /* Max byte buffer size */
 
@@ -130,7 +130,7 @@ int main(argc, argv) int argc, argv[]; {
 
     if (argc > 1) {
         if (strlen(argv[1]) > MAX_FNAME - 1) {
-            printf("Filename is too long.");
+            fprintf(stderr, "Filename is too long.");
             return -1;
         } else {
             strcpy(fname, argv[1]);
@@ -141,7 +141,7 @@ int main(argc, argv) int argc, argv[]; {
             aoffs = atoi(argv[2]);
         }
     } else {
-        printf("Usage: be filename.ext [address offset]");
+        fprintf(stderr, "Usage: be filename.ext [address offset]");
         return -1;
     }
     scrClr();
@@ -436,7 +436,7 @@ fileRead() {
     int i;
 
     if (!(fp = fopen(fname, "r"))) {
-        printf("Cannot open %s", fname);
+        fprintf(stderr, "Cannot open %s", fname);
         return -1;
     }
     for (i = 0; i < MAX_BYTES; ++i) {
@@ -446,7 +446,7 @@ fileRead() {
     }
     fclose(fp);
     if (i >= MAX_BYTES) {
-        printf("Not enough memory to read %s", fname);
+        fprintf(stderr, "Not enough memory to read %s", fname);
         return -1;
     }
     bsize = i;
