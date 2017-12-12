@@ -2,31 +2,47 @@
 
 ## Background
 
-I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C
-and assembler. My source code is unfortunately gone with the disks that
-I stored it on. But when I found and tried out some CP/M emulators I got
-the urge to rewrite some of the code from memory. My memory is not too
-good so I think that I actually rewrite everything from scratch.
+I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C and
+assembly. My source code is unfortunately gone with the disks that I stored
+it on and with the computers I ran it on; a Spectravideo MSX with expansion
+box and a Jet 80 with a DEC VT-220 terminal. By 1995 I thought that I would
+not use CP/M again. UNIX and M$ Windows had taken over.
 
-I started with the Binary Editor because I had real good use of that
-kind of editor. Could not find any in the CP/M archives on the web.
+But when I found and tried out some CP/M emulators I got the urge to write
+some of that good old code again - from scratch.
 
-Continued with an attempt to port the Kilo editor to CP/M because I
-wanted to have a source code editor with syntax highlighting. But I
-soo discovered that the Kilo editor was using so much of the memory
-that I decided to write my new source code editor and a variant of the
-syntax highlighing from the Kilo editor.
-Ref: [Kilo editor|https://github.com/antirez/kilo]
+I started with the Binary Editor because I had real good use of that kind of
+editor and it should be a given tool in any programmers toolbox. Could not
+find any CP/M source code or binary in the web archives. Managed to design,
+code, test and debug a decent binary editor in a couple of days. Have already
+used it a few times when inspecting files saved by other programs.
 
+Continued with an attempt to port the Kilo editor [1] to CP/M because I wanted
+a source code editor with syntax highlighting. But I soon discovered that the
+Kilo editor was using too much of the 62KB TPA so I decided to write the Lean
+Editor that uses less memory. Also started with a variant of the syntax
+highlighting from Kilo that I named Syntax Highlighter.
 
-## Binary Editor -- a small binary editor for programmers
+While developing the Lean Editor and Syntax Highlighter I found the micro
+editor (ue) written for *nix. It is small and have the search and undo
+functions that is needed in any source code editor. So I ported ue to CP/M to
+test it. Works ok.
+
+References:
+
+  [1] Kilo editor by Salvatore Sanfilippo, https://github.com/antirez/kilo
+  [2] Micro Editor (ue) by Anthony Howe and Terry Loveall,       http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz
+  
+## Binary Editor (BE)
    
 ### Summary 
 
 *   Digital Research CP/M systems
 *   ANSI terminal
-*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by Manx Software Systems
-*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt and Andreas Gerlich.
+*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
+    Manx Software Systems
+*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+    and Andreas Gerlich.
 
 ### Functionality 
 
@@ -59,15 +75,16 @@ that you want. The help text for key mappings are located at
 Save a backup of the original BE.COM before you start editing.
 
 
-## Lean Editor -- a small text editor for programmers
+## Lean Editor (LE)
    
 ### Summary 
 
 *   Digital Research CP/M systems
-*   Wordstar key mapping
 *   ANSI terminal
-*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by Manx Software Systems
-*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt and Andreas Gerlich.
+*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
+    Manx Software Systems
+*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+    and Andreas Gerlich.
 
 ### Functionality 
 
@@ -89,18 +106,38 @@ LE is written for CP/M systems but can easily be ported to other
 operating systems.
 
 
-## Syntax Highlighter
+## Syntax Highlighter (SHL)
 
-### Summary 
+### Summary
+
+Parses and prints a byte buffer with highlighting of syntax.
 
 ### Functionality 
+
+Keeps state of multi-line comments to enable faster parsing in editors,
+for example Lean Editor or Micro Editor.
+
+### Internals 
 
 Syntax Highlighter (SHL) is in alpha state. Highlights strings and
 comments in C. Remains to highlight numeric constants and keywords.
 
+
+## Micro Editor (UE)
+
+### Summary 
+
+*   Digital Research CP/M systems
+*   ANSI terminal
+*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
+    Manx Software Systems
+*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+    and Andreas Gerlich.
+
+### Functionality 
+
+See ue/README file.
+
 ### Internals 
 
-Parses and prints a byte buffer with highlighting of syntax. Keeps
-state of multi-line comments to enable faster parsing in editors,
-for example Lean Editor.
-
+See ue/README file.

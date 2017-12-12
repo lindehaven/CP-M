@@ -1,0 +1,4 @@
+; Build U Editor using AZTEC
+cc ue
+as ue.asm
+ln -o ue.com ue.o c.lib
