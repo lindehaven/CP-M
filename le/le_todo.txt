@@ -1,6 +1,0 @@
-TODO
-
-    *   Implement Cut & Paste lines
-    *   Implement Move line up/down.
-    *   Implement Undo
-    *   Refactor and clean up the code

@@ -1,70 +1,49 @@
 /*
- *  Lean Editor -- a small text editor for programmers
- *
- *  Copyright (C) 2017 Lars Lindehaven <lars dot lindehaven at gmail dot com>
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are
- *  met:
- *
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+    Lean Editor -- a small text editor for programmers.
+    Copyright (C) 2017 Lars Lindehaven
+
+    Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+	Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware
+
+	This program is free software; you can redistribute it and/or modify it
+	under the terms of the GNU General Public License as published by the
+	Free Software Foundation; either version 2, or (at your option) any
+	later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
  */
 
 /* INCLUDES --------------------------------------------------------------- */
 
-/* Mandatory */
 #include "ctype.h"
 #include "stdio.h"
 #include "le.h"
 
-/* Optional syntax highlighting requires the SHL library and more memory. */
 #ifdef SHL
 #include "shl.h"
 #endif
 
 /* DEFINITIONS ------------------------------------------------------------ */
 
-#define PROG_NAME   "Lean Editor"
-#define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.6 2017-12-11"
-#define PROG_SYST   "CP/M"
-#define PROG_TERM   "ANSI Terminal"
-
-#define fputc       putc
-
-#define MAX_FNAME   16
-#define MAX_LINES   2000
-#define MAX_CBLINES 100
-
+#define MAX_FNAME   20
+#define MAX_EBLIN   2000
+#define MAX_CBLIN   100
 #define SY_ROW1     0
 #define SY_ROWS     1
 #define SY_COLS     (TERM_COLS)
 #define SY_COLM     0
-#define SY_COLE     0
-#define SY_COLF     2
+#define SY_COLF     1
 #define SY_COLI     (SY_COLS - 35)
-
 #define ED_ROW1     SY_ROWS
-#define ED_ROWS     ((TERM_ROWS) - ED_ROW1)
+#define ED_ROWS     (TERM_ROWS - ED_ROW1)
 #define ED_COLS     (TERM_COLS)
 #define MAX_ED_COLS (TERM_COLS)
 #define ED_TABS     (TERM_TABS)
@@ -72,47 +51,35 @@
 #define MAX_ED_TABS 8
 
 
-/* GLOBALS ---------------------------------------------------------------- */
+/* GLOBALS */
 
-/* File */
 char            fname[MAX_FNAME];
+char            *eb_tmp;
+unsigned int    *eb_arr;
+unsigned int    *cb_arr;
+int             eb_tot;
+int             cb_tot;
+int             eb_cur;
+int             cb_cur;
+unsigned int    eb_eds;
+int             es_row;
+int             es_col;
+int             es_tab;
+int             es_sys;
 
-/* Lines */
-char            *ln_dat;
-unsigned int    *lp_arr;
-int             lp_tot;
-int             lp_cur;
-unsigned int    ln_eds;
-
-/* Editor screen */
-int             ed_row;
-int             ed_col;
-int             ed_tab;
-int             ed_sys_msg;
-
-/* TODO: Clipboard */
-char            *cbln_dat;
-unsigned int    *cblp_arr;
-int             cblp_tot;
-
-/* Syntax highlighting */
 #ifdef SHL
-int             ed_shl = SHL_FAIL;
+int             es_shl = SHL_FAIL;
 #endif
-
-
-/* PROGRAM ---------------------------------------------------------------- */
 
 int main(argc, argv) int argc, argv[]; {
     int i;
-
-    if (edInitialize())
+    if (edInit())
         return -1;
     if (argc > 1) {
         if (argc == 3) {
-            ed_tab = atoi(argv[2]);
-            if (ed_tab < MIN_ED_TABS || ed_tab > MAX_ED_TABS)
-                ed_tab = TERM_TABS;
+            es_tab = atoi(argv[2]);
+            if (es_tab < MIN_ED_TABS || es_tab > MAX_ED_TABS)
+                es_tab = TERM_TABS;
         }
         if (strlen(argv[1]) > MAX_FNAME - 1) {
             fprintf(stderr, "Filename is too long.");
@@ -127,9 +94,9 @@ int main(argc, argv) int argc, argv[]; {
         return -1;
     }
 #ifdef SHL
-    ed_shl = shl_set_language(fname);
-    if  (ed_shl != SHL_FAIL)
-        shl_highlight(lp_arr[0], lp_arr[lp_tot], lp_arr[lp_tot], 0);
+    es_shl = shl_set_language(fname);
+    if  (es_shl != SHL_FAIL)
+        shl_highlight(eb_arr[0], eb_arr[eb_tot], eb_arr[eb_tot], 0);
 #endif
     scrClr();
     edLoop();
@@ -138,40 +105,44 @@ int main(argc, argv) int argc, argv[]; {
 }
 
 
-/* EDITING ---------------------------------------------------------------- */
+/* EDITING */
 
-/* Main editor loop */
 edLoop() {
     int ch;
-
     sysMsg(NULL);
     sysPutFileName();
-    edUpdAll();
+    edUpdate(0, eb_cur - es_row);
     while (1) {
-        if (ed_sys_msg)
-            ed_sys_msg = 0;
+        if (es_sys)
+            es_sys = 0;
         ch = edGetLine();
         switch (ch) {
             case KEY_RUP :
-                rowUp();
+                toRowUp();
                 break;
             case KEY_RDN :
-                rowDown();
+                toRowDown();
                 break;
             case KEY_PUP :
-                pageUp();
+                toPageUp();
                 break;
             case KEY_PDN :
-                pageDown();
+                toPageDown();
                 break;
             case KEY_FBEG :
-                toBOF();
+                toFileBeginning();
                 break;
             case KEY_FEND :
-                toEOF();
+                toFileEnd();
                 break;
-            case KEY_LNEW :
-                insLine();
+            case KEY_CENTER :
+                center();
+                break;
+            case KEY_SEARCH :
+                search();
+                break;
+            case KEY_LINS :
+                insertLine();
                 break;
             case KEY_DEL :
                 delChrRight();
@@ -180,40 +151,50 @@ edLoop() {
             case KEY_BS :
                 delChrLeft();
                 break;
+            case KEY_LCUT :
+                cutLine();
+                break;
+            case KEY_PASTE :
+                paste();
+                break;
+            case KEY_LUP :
+                mvLineUp();
+                break;
+            case KEY_LDN :
+                mvLineDown();
+                break;
             case KEY_FSAVE :
                 fileWrite();
-                ln_eds = 0;
-                edUpdAll();
+                eb_eds = 0;
+                edUpdate(0, eb_cur - es_row);
                 break;
             case KEY_FQUIT :
-                if (!ln_eds)
-                    return 0;
+                if (!eb_eds)
+                    return;
                 else if (sysMsgConf("Discard changes (Y/N)? "))
-                    return 0;
+                    return;
                 else {
                     sysPutFileName();
-                    edUpdAll();
+                    edUpdate(0, eb_cur - es_row);
                 }
                 break;
         }
     }
 }
 
-/* Edit current line */
 edGetLine() {
     int i, ch, len, old_len, run, upd_sys, upd_pos, upd_lin, spc;
     char *buf;
-
-    strcpy(ln_dat, lp_arr[lp_cur]);
-    len = old_len = strlen(ln_dat);
+    strcpy(eb_tmp, eb_arr[eb_cur]);
+    len = old_len = strlen(eb_tmp);
     run = upd_sys = upd_pos = 1;
     upd_lin = spc = 0;
-    if (ed_col > len)
-        ed_col = len;
+    if (es_col > len)
+        es_col = len;
     while (run) {
         if (upd_lin) {
             upd_lin = 0;
-            putstr(ln_dat + ed_col);
+            putString(eb_tmp + es_col);
             if (spc) {
                 putchar(' ');
                 spc = 0;
@@ -221,119 +202,115 @@ edGetLine() {
         }
         if (upd_sys) {
             upd_sys = 0;
-            scrChrInverted();
-            scrPosCur(SY_ROW1, SY_COLE);
-            putchar(ln_eds ? '*' : ' ');
-            scrPosCur(SY_ROW1, SY_COLI);
-            printf("E:%05d  ", ln_eds);
-            printf("T:%d  ", ed_tab);
-            printf("R:%04d/%04d  ", lp_cur + 1, lp_tot);
-            printf("C:%02d/%02d", ed_col + 1, len);
-            scrChrNormal();
+            sysPutInfo(eb_eds, es_tab, eb_cur, eb_tot, es_col, len);
         }
         if (upd_pos) {
             upd_pos = 0;
-            scrPosCur(ED_ROW1 + ed_row, ed_col);
+            scrPosCur(ED_ROW1 + es_row, es_col);
         }
         ch = keyPressed();
         switch (ch) {
             case KEY_RUP :
-                if (lp_cur)
+                if (eb_cur)
                     run = 0;
                 ++upd_pos;
                 break;
             case KEY_RDN :
-                if (lp_cur < lp_tot - 1)
+                if (eb_cur < eb_tot - 1)
                     run = 0;
                 ++upd_pos;
                 break;
             case KEY_CLT :
-                if (ed_col) {
-                    --ed_col;
+                if (es_col) {
+                    --es_col;
                     ++upd_sys;
-                } else if (lp_cur) {
+                } else if (eb_cur) {
                     ch = KEY_RUP;
-                    ed_col = 0x7fff;
+                    es_col = 0x7fff;
                     run = 0;
                 }
                 ++upd_pos;
                 break;
             case KEY_CRT :
-                if (ed_col < len) {
-                    ++ed_col;
+                if (es_col < len) {
+                    ++es_col;
                     ++upd_sys;
-                } else if (lp_cur < lp_tot - 1) {
+                } else if (eb_cur < eb_tot - 1) {
                     ch = KEY_RDN;
-                    ed_col = 0;
+                    es_col = 0;
                     run = 0;
                 }
                 ++upd_pos;
                 break;
             case KEY_WLT :
-                if (ed_col) {
-                    if ((ln_dat[ed_col] & 0x7f) != ' ' &&
-                        (ln_dat[ed_col - 1] & 0x7f) == ' ')
-                        --ed_col;
-                    while (ed_col && (ln_dat[ed_col] & 0x7f) == ' ')
-                        --ed_col;
-                    while (ed_col && (ln_dat[ed_col] & 0x7f) != ' ') {
-                        if ((ln_dat[--ed_col] & 0x7f) == ' ') {
-                            ++ed_col;
+                if (es_col) {
+                    if ((eb_tmp[es_col] & 0x7f) != ' ' &&
+                        (eb_tmp[es_col - 1] & 0x7f) == ' ')
+                        --es_col;
+                    while (es_col && (eb_tmp[es_col] & 0x7f) == ' ')
+                        --es_col;
+                    while (es_col && (eb_tmp[es_col] & 0x7f) != ' ') {
+                        if ((eb_tmp[--es_col] & 0x7f) == ' ') {
+                            ++es_col;
                             break;
                         }
                     }
                     ++upd_sys;
-                } else if (lp_cur) {
+                } else if (eb_cur) {
                     ch = KEY_RUP;
-                    ed_col = 0x7fff;
+                    es_col = 0x7fff;
                     run = 0;
                 }
                 ++upd_pos;
                 break;
             case KEY_WRT :
-                if (ed_col >= len && lp_cur < lp_tot - 1) {
+                if (es_col >= len && eb_cur < eb_tot - 1) {
                     ch = KEY_RDN;
-                    ed_col = 0;
+                    es_col = 0;
                     run = 0;
                 } else {
-                    while (ln_dat[ed_col] && (ln_dat[ed_col] & 0x7f) != ' ')
-                        ++ed_col;
-                    while ((ln_dat[ed_col] & 0x7f) == ' ')
-                        ++ed_col;
+                    while (eb_tmp[es_col] && (eb_tmp[es_col] & 0x7f) != ' ')
+                        ++es_col;
+                    while ((eb_tmp[es_col] & 0x7f) == ' ')
+                        ++es_col;
                     ++upd_sys;
                     ++upd_pos;
                 }
                 break;
             case KEY_LBEG :
-                if (ed_col) {
-                    ed_col = 0;
+                if (es_col) {
+                    es_col = 0;
                     ++upd_sys;
                 }
                 ++upd_pos;
                 break;
             case KEY_LEND :
-                if (ed_col != len) {
-                    ed_col = len;
+                if (es_col != len) {
+                    es_col = len;
                     ++upd_sys;
                 }
                 ++upd_pos;
                 break;
             case KEY_PUP :
             case KEY_FBEG :
-                if (lp_cur || ed_col)
+                if (eb_cur || es_col)
                     run = 0;
                 ++upd_pos;
                 break;
             case KEY_PDN :
             case KEY_FEND :
-                if (lp_cur < lp_tot - 1 || ed_col != len)
+                if (eb_cur < eb_tot - 1 || es_col != len)
                     run = 0;
                 ++upd_pos;
                 break;
+            case KEY_CENTER :
+            case KEY_SEARCH :
+                run = 0;
+                break;
             case KEY_TABW :
-                ed_tab++;
-                if (ed_tab > MAX_ED_TABS)
-                    ed_tab = MIN_ED_TABS;
+                es_tab++;
+                if (es_tab > MAX_ED_TABS)
+                    es_tab = MIN_ED_TABS;
                 ++upd_sys;
                 ++upd_pos;
                 break;
@@ -341,42 +318,62 @@ edGetLine() {
                 len += tabToSpaces();
                 run = 0;
                 break;
-            case KEY_LNEW :
-                if (lp_tot < MAX_LINES) {
+            case KEY_LINS :
+                if (eb_tot < MAX_EBLIN) {
                     run = 0;
-                    ++ln_eds;
+                    ++eb_eds;
                 }
                 break;
             case KEY_DEL :
-                if (ed_col < len) {
-                    strcpy(ln_dat + ed_col, ln_dat + ed_col + 1);
+                /*TODO: Move deleted character to clipboard */
+                if (es_col < len) {
+                    strcpy(eb_tmp + es_col, eb_tmp + es_col + 1);
                     --len;
                     ++upd_sys;
                     ++upd_lin;
-                    ++ln_eds;
+                    ++eb_eds;
                     ++spc;
-                } else if (lp_cur < lp_tot -1) {
-                    ++ln_eds;
+                } else if (eb_cur < eb_tot -1) {
+                    ++eb_eds;
                     run = 0;
                 }
                 ++upd_pos;
                 break;
             case KEY_RUB :
             case KEY_BS :
-                if (ed_col) {
-                    strcpy(ln_dat + ed_col - 1, ln_dat + ed_col);
-                    --ed_col;
+                /*TODO: Move deleted character to clipboard */
+                if (es_col) {
+                    strcpy(eb_tmp + es_col - 1, eb_tmp + es_col);
+                    --es_col;
                     --len;
                     ++upd_sys;
                     ++upd_lin;
-                    ++ln_eds;
+                    ++eb_eds;
                     ++spc;
                     putchar('\b');
-                } else if (lp_cur) {
-                    ++ln_eds;
+                } else if (eb_cur) {
+                    ++eb_eds;
                     run = 0;
                 }
                 ++upd_pos;
+                break;
+            case KEY_LCUT :
+                /*TODO: Delete line (and move to clipboard) */
+                break;
+            case KEY_PASTE :
+                /*TODO: Paste deleted text from clipboard */
+                break;
+            case KEY_LUP :
+                if (eb_cur) {
+                    ++eb_eds;
+                    run = 0;
+                }
+                break;
+            case KEY_LDN :
+                if (eb_cur < eb_tot - 1) {
+                    ++eb_eds;
+                    run = 0;
+                }
                 break;
             case KEY_FSAVE :
             case KEY_FQUIT :
@@ -385,383 +382,452 @@ edGetLine() {
             default :
                 if (len < MAX_ED_COLS && ch >= ' ') {
                     putchar(ch & 0x7f);
-                    for (i = len; i > ed_col; --i) {
-                        ln_dat[i] = ln_dat[i - 1];
+                    for (i = len; i > es_col; --i) {
+                        eb_tmp[i] = eb_tmp[i - 1];
                     }
-                    ln_dat[ed_col++] = ch & 0x7f;
-                    ln_dat[++len] = 0;
+                    eb_tmp[es_col++] = ch & 0x7f;
+                    eb_tmp[++len] = 0;
                     ++upd_lin;
                     ++upd_sys;
-                    ++ln_eds;
+                    ++eb_eds;
                 }
                 ++upd_pos;
                 break;
         }
     }
     if (len == old_len) {
-        strcpy(lp_arr[lp_cur], ln_dat);
+        strcpy(eb_arr[eb_cur], eb_tmp);
     } else if (!(buf = malloc(len + 1))) {
         errMsgMemory();
     } else {
-        strcpy(buf, ln_dat);
-        free(lp_arr[lp_cur]);
-        lp_arr[lp_cur] = buf;
-        edUpdAll();
+        strcpy(buf, eb_tmp);
+        free(eb_arr[eb_cur]);
+        eb_arr[eb_cur] = buf;
+        edUpdate(0, eb_cur - es_row);
     }
     return ch;
 }
 
-/* Initialize global variables */
-int edInitialize() {
+int edInit() {
     int i;
-
-    ln_dat = malloc(MAX_ED_COLS + 2);
-    lp_arr = malloc(MAX_LINES * 2);
-    if (!ln_dat || !lp_arr) {
+    eb_tmp = malloc(MAX_ED_COLS + 2);
+    eb_arr = malloc(MAX_EBLIN * 2);
+    cb_arr = malloc(MAX_CBLIN * 2);
+    if (!eb_tmp || !eb_arr || !cb_arr) {
         fprintf(stderr, "Not enough memory!");
         return -1;
     }
-    for (i = 0; i < MAX_LINES; ++i)
-        lp_arr[i] = NULL;
-    lp_tot = 0;
-    lp_cur = 0;
-    ln_eds = 0;    
-    ed_row = 0;
-    ed_col = 0;
-    ed_tab = ED_TABS;
-
-    /* TODO: Clipboard */
-    cbln_dat = malloc(MAX_ED_COLS + 2);
-    cblp_arr = malloc(MAX_CBLINES * 2);
-    if (!cbln_dat || !cblp_arr) {
-        fprintf(stderr, "Not enough memory!");
-        return -1;
-    }
-    for (i = 0; i < MAX_CBLINES; ++i)
-        lp_arr[i] = NULL;
-    cblp_tot = 0;
-
+    *eb_tmp = 0;
+    for (i = 0; i < MAX_EBLIN; ++i)
+        eb_arr[i] = NULL;
+    for (i = 0; i < MAX_CBLIN; ++i)
+        cb_arr[i] = NULL;
+    eb_tot = cb_tot = eb_cur = cb_cur = eb_eds = 0;
+    es_row = es_col = 0;
+    es_tab = ED_TABS;
     return 0;
 }
 
-/* Return line number of first line printed on the editor screen */
 edGetFirstLineNumber() {
-    return lp_cur - ed_row;
+    return eb_cur - es_row;
 }
 
-/* Return line number of last line printed on the editor screen */
 edGetLastLineNumber() {
-    int last;
-
-    last = edGetFirstLineNumber() + ED_ROWS - 1;
-    return last >= lp_tot - 1 ? lp_tot - 1 : last;
+    int last = edGetFirstLineNumber() + ED_ROWS - 1;
+    return last >= eb_tot - 1 ? eb_tot - 1 : last;
 }
 
-/* Clear the editor screen */
-edClr() {
+edClear() {
     int i;
-
     for (i = 0; i < ED_ROWS; ++i)
         scrClrRow(ED_ROW1 + i);
 }
 
-/* Update editor screen from specified row */
-edUpd(row, line) int row, line; {
+edUpdate(row, line) int row, line; {
     int i;
-
     for (i = row; i < ED_ROWS; ++i) {
         scrClrRow(ED_ROW1 + i);
-        if (line < lp_tot) {
+        if (line < eb_tot) {
 #ifdef SHL
-          if (ed_shl >= 0)
-            ed_shl = shl_highlight(lp_arr[line],
-                                   lp_arr[line] + strlen(lp_arr[line]),
-                                   lp_arr[line], 1);
+          if (es_shl >= 0)
+            es_shl = shl_highlight(eb_arr[line],
+                                   eb_arr[line] + strlen(eb_arr[line]),
+                                   eb_arr[line], 1);
           else
 #endif
-            putstr(lp_arr[line]);
+            putString(eb_arr[line]);
             line++;
         }
     }
 }
 
-/* Update editor screen from first row */
-edUpdAll() {
-    edUpd(0, lp_cur - ed_row);
-}
-
-/* Insert spaces instead of tab at cursor */
 int tabToSpaces() {
     int len, spc, i, j;
-
-    len = strlen(ln_dat);
-    spc = ed_tab - ed_col % ed_tab;
+    len = strlen(eb_tmp);
+    spc = es_tab - es_col % es_tab;
     if (len + spc <= MAX_ED_COLS) {
         for (i = 0; i < spc; ++i) {
-            for (j = len; j > ed_col; --j)
-                ln_dat[j] = ln_dat[j - 1];
-            ln_dat[ed_col++] = ' ';
-            ln_dat[++len] = 0;
+            for (j = len; j > es_col; --j)
+                eb_tmp[j] = eb_tmp[j - 1];
+            eb_tmp[es_col++] = ' ';
+            eb_tmp[++len] = 0;
         }
-        ++ln_eds;
+        ++eb_eds;
     }
     return spc;
 }
 
-/* Insert new line at cursor */
-insLine() {
-    int left_len, right_len, i;
+insertLine() {
+    int left_len = es_col;
+    int right_len = strlen(eb_tmp) - es_col;
+    int i;
     char *p1, *p2;
-
-    left_len = ed_col;
-    right_len = strlen(ln_dat) - ed_col;
-    p1 = malloc(left_len + 1);
-    p2 = malloc(right_len + 1);
-    if (!p1 || !p2) {
-        errMsgMemory();
-        if (p1)
-            free(p1);
-        if (p2)
-            free(p2);
-        return;
+    if (!(p1 = malloc(left_len + 1))) {
+        errMsgMemory(); return;
     }
-    strcpy(p2, ln_dat + ed_col);
-    ln_dat[ed_col] = 0;
-    strcpy(p1, ln_dat);
-    for (i = lp_tot; i > lp_cur; --i)
-        lp_arr[i] = lp_arr[i - 1];
-    ++lp_tot;
-    free(lp_arr[lp_cur]);
-    lp_arr[lp_cur++] = p1;
-    lp_arr[lp_cur] = p2;
+    if (!(p2 = malloc(right_len + 1))) {
+        errMsgMemory(); free(p1); return;
+    }
+    strcpy(p2, eb_tmp + es_col);
+    eb_tmp[es_col] = 0;
+    strcpy(p1, eb_tmp);
+    for (i = eb_tot; i > eb_cur; --i)
+        eb_arr[i] = eb_arr[i - 1];
+    ++eb_tot;
+    free(eb_arr[eb_cur]);
+    eb_arr[eb_cur++] = p1;
+    eb_arr[eb_cur] = p2;
     scrClrEol();
-    if (ed_row < ED_ROWS - 1)
-        edUpd(++ed_row, lp_cur);
+    if (es_row < ED_ROWS - 1)
+        edUpdate(++es_row, eb_cur);
     else
-        edUpd(0, lp_cur - ED_ROWS + 1);
-    ed_col = 0;
+        edUpdate(0, eb_cur - ED_ROWS + 1);
+    es_col = 0;
 }
 
-/* Delete character on the left of cursor */
 delChrLeft() {
-    int len_up, len_cur, i;
+    int len_up = strlen(eb_arr[eb_cur - 1]);
+    int len_cur = strlen(eb_tmp);
+    int i;
     char *p;
-
-    len_up = strlen(lp_arr[lp_cur - 1]);
-    len_cur = strlen(ln_dat);
     if (len_up + len_cur > MAX_ED_COLS)
         return;
     if (!(p = malloc(len_up + len_cur + 1))) {
         errMsgMemory(); return;
     }
-    strcpy(p, lp_arr[lp_cur - 1]);
-    strcat(p, ln_dat);
-    --lp_tot;
-    free(lp_arr[lp_cur]);
-    free(lp_arr[lp_cur - 1]);
-    for (i = lp_cur; i < lp_tot; ++i)
-        lp_arr[i] = lp_arr[i + 1];
-    lp_arr[lp_tot] = NULL;
-    lp_arr[--lp_cur] = p;
-    ed_col = len_up;
-    if (ed_row) {
-        scrPosCur(ED_ROW1 + --ed_row, ed_col);
-        putstr(lp_arr[lp_cur] + ed_col);
-        edUpd(ed_row + 1, lp_cur + 1);
+    strcpy(p, eb_arr[eb_cur - 1]);
+    strcat(p, eb_tmp);
+    --eb_tot;
+    free(eb_arr[eb_cur]);
+    free(eb_arr[eb_cur - 1]);
+    for (i = eb_cur; i < eb_tot; ++i)
+        eb_arr[i] = eb_arr[i + 1];
+    eb_arr[eb_tot] = NULL;
+    eb_arr[--eb_cur] = p;
+    es_col = len_up;
+    if (es_row) {
+        scrPosCur(ED_ROW1 + --es_row, es_col);
+        putString(eb_arr[eb_cur] + es_col);
+        edUpdate(es_row + 1, eb_cur + 1);
     } else
-        edUpd(0, lp_cur);
+        edUpdate(0, eb_cur);
 }
 
-/* Delete character on the right of cursor */
 delChrRight() {
-    int len_dn, len_cur, i;
+    int len_dn = strlen(eb_arr[eb_cur + 1]);
+    int len_cur = strlen(eb_tmp);
+    int i;
     char *p;
-
-    len_dn = strlen(lp_arr[lp_cur + 1]);
-    len_cur = strlen(ln_dat);
     if (len_dn + len_cur > MAX_ED_COLS)
         return;
     if (!(p = malloc(len_dn + len_cur + 1))) {
         errMsgMemory(); return;
     }
-    strcpy(p, ln_dat);
-    strcat(p, lp_arr[lp_cur + 1]);
-    --lp_tot;
-    free(lp_arr[lp_cur]);
-    free(lp_arr[lp_cur + 1]);
-    for (i = lp_cur + 1; i < lp_tot; ++i)
-        lp_arr[i] = lp_arr[i + 1];
-    lp_arr[lp_tot] = NULL;
-    lp_arr[lp_cur] = p;
-    putstr(p + ed_col);
-    if (ed_row < ED_ROWS - 1)
-        edUpd(ed_row + 1, lp_cur + 1);
+    strcpy(p, eb_tmp);
+    strcat(p, eb_arr[eb_cur + 1]);
+    --eb_tot;
+    free(eb_arr[eb_cur]);
+    free(eb_arr[eb_cur + 1]);
+    for (i = eb_cur + 1; i < eb_tot; ++i)
+        eb_arr[i] = eb_arr[i + 1];
+    eb_arr[eb_tot] = NULL;
+    eb_arr[eb_cur] = p;
+    putString(p + es_col);
+    if (es_row < ED_ROWS - 1)
+        edUpdate(es_row + 1, eb_cur + 1);
 }
 
+cutLine() {
+    ;
+}
 
-/* CURSOR MOVEMENT -------------------------------------------------------- */
+paste() {
+    ;
+}
 
-/* Move cursor one row up */
-rowUp() {
-    --lp_cur;
-    if (ed_row)
-        --ed_row;
+mvLineUp() {
+    int len_up = strlen(eb_arr[eb_cur - 1]);
+    int len_cur = strlen(eb_arr[eb_cur]);
+    char *p1, *p2;
+    if (eb_cur) {
+        if (!(p1 = malloc(len_up + 1))) {
+            errMsgMemory(); return;
+        }
+        if (!(p2 = malloc(len_cur + 1))) {
+            errMsgMemory(); free(p1); return;
+        }
+        strcpy(p1, eb_arr[eb_cur - 1]);
+        strcpy(p2, eb_arr[eb_cur]);
+        free(eb_arr[eb_cur - 1]);
+        free(eb_arr[eb_cur]);
+        eb_arr[eb_cur - 1] = p2;
+        eb_arr[eb_cur] = p1;
+        edUpdate(0, eb_cur - es_row);
+        toRowUp();
+    }
+}
+
+mvLineDown() {
+    int len_dn = strlen(eb_arr[eb_cur + 1]);
+    int len_cur = strlen(eb_arr[eb_cur]);
+    char *p1, *p2;
+    if (eb_cur < eb_tot - 1) {
+        if (!(p1 = malloc(len_dn + 1))) {
+            errMsgMemory(); return;
+        }
+        if (!(p2 = malloc(len_cur + 1))) {
+            errMsgMemory(); free(p1); return;
+        }
+        strcpy(p1, eb_arr[eb_cur + 1]);
+        strcpy(p2, eb_arr[eb_cur]);
+        free(eb_arr[eb_cur + 1]);
+        free(eb_arr[eb_cur]);
+        eb_arr[eb_cur + 1] = p2;
+        eb_arr[eb_cur] = p1;
+        edUpdate(0, eb_cur - es_row);
+        toRowDown();
+    }
+}
+
+/* NAVIGATION */
+
+toRowUp() {
+    --eb_cur;
+    if (es_row)
+        --es_row;
     else
-        edUpd(0, lp_cur);
+        edUpdate(0, eb_cur);
 }
 
-/* Move cursor one row down */
-rowDown() {
-    ++lp_cur;
-    if (ed_row < ED_ROWS - 1)
-        ++ed_row;
+toRowDown() {
+    ++eb_cur;
+    if (es_row < ED_ROWS - 1)
+        ++es_row;
     else
-        edUpd(0, lp_cur - ED_ROWS + 1);
+        edUpdate(0, eb_cur - ED_ROWS + 1);
 }
 
-/* Move cursor one page up */
-pageUp() {
-    int first, to;
-
-    first = edGetFirstLineNumber();
+toPageUp() {
+    int first = edGetFirstLineNumber();
+    int to;
     if (first) {
         if ((to = first - ED_ROWS) < 0)
             to = 0;
-        lp_cur = to; ed_row = ed_col = 0;
-        edUpdAll();
+        eb_cur = to;
+        es_row = es_col = 0;
+        edUpdate(0, eb_cur - es_row);
     } else
-        toBOF();
+        toFileBeginning();
 }
 
-/* Move cursor one page down */
-pageDown() {
-    int first, last, to;
-
-    first = edGetFirstLineNumber();
-    last = edGetLastLineNumber();
-    if (last < lp_tot - 1) {
+toPageDown() {
+    int first = edGetFirstLineNumber();
+    int last = edGetLastLineNumber();
+    int to;
+    if (last < eb_tot - 1) {
         to = first + ED_ROWS;
-        if (to >= lp_tot)
-            to = lp_tot - 1;
-        lp_cur = to; ed_row = ed_col = 0;
-        edUpdAll();
+        if (to >= eb_tot)
+            to = eb_tot - 1;
+        eb_cur = to;
+        es_row = es_col = 0;
+        edUpdate(0, eb_cur - es_row);
     } else
-        toEOF();
+        toFileEnd();
 }
 
-/* Move cursor to beginning of file/document */
-toBOF() {
-    int first;
-
-    first = edGetFirstLineNumber();
-    lp_cur = ed_row = ed_col = 0;
+toFileBeginning() {
+    int first = edGetFirstLineNumber();
+    eb_cur = es_row = es_col = 0;
     if (first > 0)
-        edUpdAll();
+        edUpdate(0, eb_cur - es_row);
 }
 
-/* Move cursor to bottom of file/document */
-toEOF() {
-    int first, last;
-
-    first = edGetFirstLineNumber();
-    last = edGetLastLineNumber();
-    lp_cur = lp_tot - 1;
-    ed_col = MAX_LINES+1;
-    if (last < lp_tot - 1) {
-        ed_row = ED_ROWS - 1;
-        edUpdAll();
+toFileEnd() {
+    int first = edGetFirstLineNumber();
+    int last = edGetLastLineNumber();
+    eb_cur = eb_tot - 1;
+    es_col = MAX_EBLIN+1;
+    if (last < eb_tot - 1) {
+        es_row = ED_ROWS - 1;
+        edUpdate(0, eb_cur - es_row);
     } else
-        ed_row = last - first;
+        es_row = last - first;
 }
 
+center() {
+    if (eb_cur > ED_ROWS/2-1 && es_row != ED_ROWS/2-1) {
+        es_row = ED_ROWS/2-1;
+        edUpdate(0, eb_cur - es_row);
+    }
+}
 
-/* SYSTEM ----------------------------------------------------------------- */
+nextChar() {
+    if (es_col < strlen(eb_arr[eb_cur])) {
+        ++es_col;
+    } else {
+        es_col = 0;
+        eb_cur++;
+    }
+}
 
-/* Print message on system line */
-sysMsg(s) char *s; {
+search() {
+    static char sstr7[MAX_FNAME];
+    static char sstr8[MAX_FNAME];
+    static int slen = 0;
+    int len;
+    char ch;
+    do {
+        sysPutSearchString(sstr7, slen);
+        len = strlen(eb_arr[eb_cur]);
+        sysPutInfo(eb_eds, es_tab, eb_cur, eb_tot, es_col, len);
+        scrPosCur(ED_ROW1 + es_row, es_col);
+        ch = keyPressed();
+        if (slen > 0 && (ch == KEY_RUB || ch == KEY_BS))
+            slen--;
+        else if (slen < MAX_FNAME && ch > 0x1f) {
+            sstr7[slen] = ch;
+            sstr8[slen] = ch | 0x80;
+            slen++;
+        }
+        if (slen > 0) {
+            if (ch == KEY_SEARCH)
+                nextChar();
+            while (eb_cur < eb_tot &&
+                   strncmp(&eb_arr[eb_cur][es_col], sstr7, slen) &&
+                   strncmp(&eb_arr[eb_cur][es_col], sstr8, slen)) {
+                nextChar();
+            }
+            if (eb_cur < eb_tot) {
+                es_row = 0;
+                edUpdate(es_row, eb_cur);
+            } else {
+                eb_cur = es_row = es_col = 0;
+                edUpdate(0, eb_cur - es_row);
+            }
+        }
+    } while (ch!=0x1b && ch!=KEY_LINS && ch!=KEY_FSAVE && ch!=KEY_FQUIT &&
+             ch!=KEY_CLT && ch!=KEY_CRT && ch!=KEY_RUP && ch!=KEY_RDN);
+    sysPutFilename();
+}
+
+/* SYSTEM LINE */
+
+sysClear() {
     int i;
-
     scrClrRow(SY_ROW1);
     scrChrInverted();
     for (i = 0; i < SY_COLS; i++)
         putchar(' ');
+}
+    
+sysMsg(s) char *s; {
+    int i;
+    sysClear();
     if (s) {
         scrPosCur(SY_ROW1, SY_COLM);
         printf("%s", s);
     }
     scrChrNormal();
-    ed_sys_msg = 1;
+    es_sys = 1;
 }
 
-/* Print message on system line and wait for a key press */
 sysMsgKey(s) char *s; {
     sysMsg(s);
     keyPressed();
-    sysMsg(NULL);
+    sysPutFileName();
 }
 
-/* Print message on system line and wait for confirmation */
 int sysMsgConf(s) char *s; {
     int ch;
-
     sysMsg(s);
     ch = toupper(keyPressed());
     sysMsg(NULL);
     return ch == 'Y' ? 1 : 0;
 }
 
-/* Display the filename on system line */
 sysPutFileName() {
-    int i;
-
+    sysClear();
     scrPosCur(SY_ROW1, SY_COLF);
-    scrChrInverted();
-    for (i = MAX_FNAME - 1; i; --i)
-        putchar(' ');
-    scrPosCur(SY_ROW1, SY_COLF);
-    putstr(fname[0] ? fname : "????????.???");
+    putString("File:");
+    putString(fname[0] ? fname : "????????.???");
     scrChrNormal();
 }
 
+sysPutSearchString(s, len) char *s; int len; {
+    sysClear();
+    scrPosCur(SY_ROW1, SY_COLF);
+    putString("Search:");
+    while (len--)
+        putchar(*s++ & 0x7f);
+    scrChrNormal();
+}
 
-/* FILE ------------------------------------------------------------------- */
+sysPutInfo(eds, tab, cur, tot, col, len) int eds, tab, cur, tot, col, len; {
+    scrChrInverted();
+    scrPosCur(SY_ROW1, SY_COLI);
+    printf("E:%05d  ", eds);
+    printf("T:%d  ", tab);
+    printf("R:%04d/%04d  ", cur + 1, tot);
+    printf("C:%02d/%02d ", col + 1, len);
+    scrChrNormal();
+}
 
-/* Read file to lines */
+/* FILE INPUT/OUTPUT */
+
 int fileRead() {
     FILE *fp;
     int line, col;
     char ch, *p;
-
     if (!(fp = fopen(fname, "r"))) {
         fprintf(stderr, "Cannot open %s for reading!", fname);
         return -1;
     }
-    for (line = 0; line <= MAX_LINES; ++line) {
+    for (line = 0; line <= MAX_EBLIN; ++line) {
         ch = fgetc(fp) & 0x7f;
         for (col = 0;
              col < MAX_ED_COLS + 2 && ch != '\n' && ch != 0x1a && !feof(fp);
              col++) {
-            ln_dat[col] = 0;
+            eb_tmp[col] = 0;
             if (ch == '\r')
                 ;
             else if (ch == '\t') {
-                ln_dat[col] = ' ';
-                ln_dat[col + 1] = 0;
-                ed_col = col + 1;
+                eb_tmp[col] = ' ';
+                eb_tmp[col + 1] = 0;
+                es_col = col + 1;
                 col += tabToSpaces();
-                ed_col = 0;
+                es_col = 0;
             } else if (ch > 0x1f)
-                ln_dat[col] = ch;
+                eb_tmp[col] = ch;
             else {
                 fprintf(stderr, "Unexpected control character in file!");
                 return -1;
             }
             ch = fgetc(fp) & 0x7f;
         }
-        ln_dat[col] = 0;
-        if (line >= MAX_LINES) {
+        eb_tmp[col] = 0;
+        if (line >= MAX_EBLIN) {
             fclose(fp);
-            fprintf(stderr, "Too many lines in file (>%d)!", MAX_LINES);
+            fprintf(stderr, "Too many lines in file (>%d)!", MAX_EBLIN);
             return -1;
         }
         if (col > MAX_ED_COLS + 1) {
@@ -769,50 +835,44 @@ int fileRead() {
             fprintf(stderr, "Too long lines in file (>%d)!", MAX_ED_COLS);
             return -1;
         }
-        if (!(lp_arr[line] = malloc(col))) {
+        if (!(eb_arr[line] = malloc(col))) {
             fclose(fp);
             fprintf(stderr, "Too large file (not enough memory)!");
             return -1;
         }
-        strcpy(lp_arr[line], ln_dat);
+        strcpy(eb_arr[line], eb_tmp);
         if (ch == 0x1a || feof(fp)) {
             line++;
             break;
         }
     }
     fclose(fp);
-    lp_tot = line;
-    if (!lp_tot) {
+    eb_tot = line;
+    if (!eb_tot) {
         p = malloc(1);
         *p = 0;
-        lp_arr[lp_tot++] = p;
+        eb_arr[eb_tot++] = p;
     }
     return 0;
 }
 
-/* Write lines to file */
 int fileWrite() {
     FILE *fp;
     int line;
     char *p;
-
     if (!(fp = fopen(fname, "w"))) {
         errMsgOpen();
         return -1;
     }
-    for (line = 0; line < lp_tot - 1; line++) {
-        p = lp_arr[line];
+    for (line = 0; line < eb_tot - 1; line++) {
+        p = eb_arr[line];
         while (*p) {
             if (fputc((*p++ & 0x7f), fp) == EOF) {
-                fclose(fp);
-                errMsgWrite();
-                return -1;
+                fclose(fp); errMsgWrite(); return -1;
             }
         }
         if (fputc('\r', fp) == EOF || fputc('\n', fp) == EOF) {
-            fclose(fp);
-            errMsgWrite();
-            return -1;
+            fclose(fp); errMsgWrite(); return -1;
         }
     }
     if (fclose(fp) == EOF) {
@@ -823,16 +883,15 @@ int fileWrite() {
 }
 
 
-/* OUTPUT ------------------------------------------------------------- */
+/* SCREEN OUTPUT */
 
-/* Print ASCII string on screen */
-putstr(s) char *s; {
+putString(s) char *s; {
     while (*s)
         putchar(*s++ & 0x7f);
 }
 
-/* Print error message and wait for a key press */
 errMsg(s) char *s; {
+    edUpdate(0, eb_cur - es_row);
     sysMsgKey(s);
 }
 
@@ -856,42 +915,36 @@ errMsgMemory() {
     errMsg("Not enough memory!");
 }
 
-/* SCREEN ------------------------------------------------------------- */
+/* ANSI SCREEN */
 
-/* Inverted video */
 scrChrInverted() {
     printf("\x1b[7m");
 }
 
-/* Normal video */
 scrChrNormal() {
     printf("\x1b[27m");
 }
 
-/* Clear screen and send cursor to upper left corner (0,0). */
 scrClr() {
     printf("\x1b[1;1H");
     printf("\x1b[2J");
 }
 
-/* Move cursor to row, col */
 scrPosCur(row, col) int row, col; {
     printf("\x1b[%d;%dH", row + 1, col + 1);
 }
 
-/* Move cursor to row and clear line */
 scrClrRow(row) int row; {
     scrPosCur(row, 0);
     scrClrEol();
 }
 
-/* Erase from the cursor to the end of the line */
 scrClrEol() {
     printf("\x1b[K");
 }
 
 
-/* KEYBOARD --------------------------------------------------------------- */
+/* CP/M KEYBOARD INPUT */
 
 #asm
 ; int keyPressed(void);
@@ -909,4 +962,3 @@ keyin2:
         mov         l,a
         ret
 #endasm
-

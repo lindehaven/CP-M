@@ -1,32 +1,24 @@
 /*
- *  Lean Editor -- a small text editor for programmers
- *
- *  Copyright (C) 2017 Lars Lindehaven <lars dot lindehaven at gmail dot com>
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are
- *  met:
- *
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+    Lean Editor -- a small text editor for programmers.
+    Copyright (C) 2017 Lars Lindehaven
+
+    Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+	Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware
+
+	This program is free software; you can redistribute it and/or modify it
+	under the terms of the GNU General Public License as published by the
+	Free Software Foundation; either version 2, or (at your option) any
+	later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
  */
 
 /* Terminal settings ------------------------------------------------------ */
@@ -47,14 +39,20 @@
 #define KEY_PDN       3     /* ^C       Cursor one page down                */
 #define KEY_FBEG     20     /* ^T       Cursor to beginning of file         */
 #define KEY_FEND     22     /* ^V       Cursor to end of file               */
+#define KEY_CENTER   26     /* ^Z       Center current row                  */
+#define KEY_SEARCH   12     /* ^L       Search string incrementally (look)  */
 
 /* Editing ---------------------------------------------------------------- */
-#define KEY_TABW     15     /* ^O       Change tab width (2/4/6/8 spaces)   */
-#define KEY_TAB       9     /* ^I       Insert tab                          */
-#define KEY_LNEW     13     /* ^M       Insert CR/LF                        */
+#define KEY_TABW     21     /* ^U       Change tab width (2-8 spaces)       */
+#define KEY_TAB       9     /* ^I       Insert tab width spaces             */
+#define KEY_LINS     13     /* ^M       Insert new line                     */
 #define KEY_DEL       7     /* ^G       Delete character to the right       */
 #define KEY_RUB       8     /* ^H       Delete character to the left        */
 #define KEY_BS      127     /* BACK     Delete character to the left        */
+#define KEY_LCUT     15     /* ^O       Delete line                         */
+#define KEY_PASTE    16     /* ^P       Paste deleted text from clipboard   */
+#define KEY_LUP      25     /* ^Y       Move line up                        */
+#define KEY_LDN       2     /* ^B       Move line down                      */
 
 /* File commands ---------------------------------------------------------- */
 #define KEY_FSAVE    23     /* ^W       Write file (save)                   */

@@ -1,6 +1,6 @@
 
     Lean Editor -- a small text editor for programmers
-   
+    
     Summary ---------------------------------------------------------------
     
         *   Digital Research CP/M systems
@@ -25,16 +25,22 @@
         ^C      Cursor one page down
         ^T      Cursor to beginning of file 
         ^V      Cursor to end of file
+        ^Z      Center current row
+        ^L      Search string incrementally (look)
 
     Editing ---------------------------------------------------------------
     
-        ^O      Change tab width (2, 4, 6 or 8 spaces)
-        ^I      Insert tab
-        ^M      Insert CR/LF
+        ^U      Change tab width (2-8 spaces)
+        ^I      Insert tab width spaces
+        ^M      Insert new line
         ^G      Delete character to the right
         DEL     Delete character to the right
         ^H      Delete character to the left
         BACK    Delete character to the left
+        ^O      Delete line
+        ^P      Paste deleted text from clipboard
+        ^Y      Move line up
+        ^B      Move line down
 
     File commands ---------------------------------------------------------
     
@@ -57,8 +63,25 @@
         
     Internals -------------------------------------------------------------
     
-        LE is written for CP/M systems but can easily be ported to other
-        operating systems.
+        LE is based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+        Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
+        LE is written for CP/M systems.
 
-    -----------------------------------------------------------------------
+    License ---------------------------------------------------------------
+
+        This program is free software; you can redistribute it and/or
+        modify it nder the terms of the GNU General Public License as
+        published by the ree Software Foundation; either version 2, or
+        (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program; if not, write to the Free Software
+        Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+        
+        See the file 'copying.txt' for more details.
 

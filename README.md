@@ -4,9 +4,8 @@
 
 I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C and
 assembly. My source code is unfortunately gone with the disks that I stored
-it on and with the computers I ran it on; a Spectravideo MSX with expansion
-box and a Jet 80 with a DEC VT-220 terminal. By 1995 I thought that I would
-not use CP/M again. UNIX and M$ Windows had taken over.
+it on and with the computers I ran it on; a Spectravideo SV-328, Jet 80 and 
+Bondwell BW-2. By 1995 I thought that I would not use CP/M again. UNIX and M$ Windows had taken over.
 
 But when I found and tried out some CP/M emulators I got the urge to write
 some of that good old code again - from scratch.
@@ -19,20 +18,27 @@ used it a few times when inspecting files saved by other programs.
 
 Continued with an attempt to port the Kilo editor [1] to CP/M because I wanted
 a source code editor with syntax highlighting. But I soon discovered that the
-Kilo editor was using too much of the 62KB TPA so I decided to write the Lean
-Editor that uses less memory. Also started with a variant of the syntax
-highlighting from Kilo that I named Syntax Highlighter.
+Kilo editor was using too much of the 62KB TPA so I decided to write an editor
+that uses less memory. Based most of my design and code on the Text editor [2].
+That became the Lean Editor.
+
+Also started with a variant of the syntax highlighting from Kilo that I named
+Syntax Highlighter.
 
 While developing the Lean Editor and Syntax Highlighter I found the micro
-editor (ue) written for *nix. It is small and have the search and undo
+editor [3] written for *nix. It is small and have the search and undo
 functions that is needed in any source code editor. So I ported ue to CP/M to
 test it. Works ok.
 
 References:
 
-  [1] Kilo editor by Salvatore Sanfilippo, https://github.com/antirez/kilo
-  [2] Micro Editor (ue) by Anthony Howe and Terry Loveall,       http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz
+  [1] Kilo editor (kilo) by Salvatore Sanfilippo (antirez), https://github.com/antirez/kilo
   
+  [2] Text editor (te) by Miguel I. García López (MiguelVis), https://github.com/MiguelVis
+
+  [3] Micro Editor (ue) by Anthony Howe and Terry Loveall,       http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz
+
+
 ## Binary Editor (BE)
    
 ### Summary 
@@ -102,8 +108,9 @@ Intel Intel 8080 CPU running at a few MHz. Just saying.
 
 ### Internals 
 
-LE is written for CP/M systems but can easily be ported to other
-operating systems.
+LE is based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
+LE is written for CP/M systems.
 
 
 ## Syntax Highlighter (SHL)
@@ -119,6 +126,7 @@ for example Lean Editor or Micro Editor.
 
 ### Internals 
 
+SHL is based on the syntax highlighting in Kilo editor (kilo) v0.0.1.
 Syntax Highlighter (SHL) is in alpha state. Highlights strings and
 comments in C. Remains to highlight numeric constants and keywords.
 
