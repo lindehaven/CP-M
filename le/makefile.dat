@@ -1,0 +1,17 @@
+# MAKEFILE FOR AZTEC C
+
+CCC = cc.com
+ASM = as.com
+LNK = ln.com
+
+all:	le leshl
+
+le:
+	$(CCC) le.c
+	$(ASM) le.asm
+	$(LNK) -o le.com le.o strstr.o c.lib
+
+leshl:
+	$(CCC) -dSHL le.c
+	$(ASM) le.asm
+	$(LNK) -o le.com le.o shl.o strstr.o c.lib

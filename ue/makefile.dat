@@ -1,0 +1,12 @@
+# MAKEFILE FOR AZTEC C
+
+CCC = cc.com
+ASM = as.com
+LNK = ln.com
+
+all:	ue
+
+ue:
+	$(CCC) ue.c
+	$(ASM) ue.asm
+	$(LNK) -o ue.com ue.o c.lib

@@ -1,0 +1,15 @@
+# MAKEFILE FOR AZTEC C
+
+CCC = cc.com
+ASM = as.com
+LNK = ln.com
+
+all:	clib
+
+clib:
+	$(CCC) memcpy.c
+	$(CCC) strchr.c
+	$(CCC) strstr.c
+	$(ASM) memcpy.asm
+	$(ASM) strchr.asm
+	$(ASM) strstr.asm

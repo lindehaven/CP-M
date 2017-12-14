@@ -1,0 +1,21 @@
+# MAKEFILE FOR AZTEC C
+
+CCC = cc.com
+ASM = as.com
+LNK = ln.com
+
+all:	shl shlcolor
+
+shl:
+	$(CCC) shl.c
+	$(CCC) shl_test.c
+	$(ASM) shl.asm
+	$(ASM) shl_test.asm
+	$(LNK) -o shl_test.com shl_test.o shl.o strstr.o c.lib
+
+shlcolor:
+	$(CCC) -dCOLOR shl.c
+	$(CCC) shl_test.c
+	$(ASM) shl.asm
+	$(ASM) shl_test.asm
+	$(LNK) -o shl_test.com shl_test.o shl.o strstr.o c.lib
