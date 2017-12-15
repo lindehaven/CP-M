@@ -37,7 +37,7 @@
 
 #define BUF (1024*20)
 #define MODE 0666
-#define TABSZ 4
+#define TABSZ 8
 #define TABM TABSZ-1
 
 #define MAXLINES 25
@@ -52,10 +52,8 @@ char str[MAXCOLS];
 char prompt[]="Look for: ";
 char sstring[MAXCOLS];
 char ubuf[BUF];
-char ks[6];
 
 char buf[BUF];
-char *ebuf = buf + BUF;
 char *etxt = buf;
 char *curp = buf;
 char *page, *epage;
@@ -261,15 +259,21 @@ void cmove(src, dest, cnt) char *src; char *dest; int cnt; {
 }
 
 void delete() {
+    int n = 1;
     if(curp < etxt){
-        if(*curp == '\n') 
+        if(*curp == '\r' && *(curp+1) == '\n'){
             LINES--;
+            n = 2;
+        }else if (*curp == '\n' && *(curp-1) == '\r'){
+            left();
+            delete();
+        }
         if((char*)&undop[1] < ubuf+BUF){
             undop->ch = *curp;
             undop->pos = -(int)curp;
             undop++;
         }
-        cmove(curp+1, curp, etxt-curp);
+        cmove(curp+n, curp, etxt-curp);
     }
 }
 
@@ -294,8 +298,7 @@ void undo() {
             cmove(curp, curp+1, etxt-curp);
             *curp = undop->ch;
             if(*curp == '\n') LINES++;
-        }
-        else{
+        }else{
             if(*curp == '\n') LINES--;
             cmove(curp+1, curp, etxt-curp);
         }
@@ -316,7 +319,7 @@ void look() {
     putstr(prompt);
     putstr(sstring);
     do {
-        c = *ks = (char)keyPressed();
+        c = (char)keyPressed();
         if(c == '\b' || c == 0x7f){
             c = '\b';
             if(!i) continue;
@@ -400,16 +403,22 @@ int main(argc, argv) int argc; char **argv; {
     }
     while (!done) {
         display();
-        ch = *ks = (char)keyPressed(); 
+        ch = (char)keyPressed(); 
         i = 0; 
         while (key[i] != ch && key[i] != '\0')
             ++i;
         (*func[i])();
         if(key[i] == '\0'){
-            if (etxt < ebuf) {
-                cmove(curp, curp+1, etxt-curp);
-                *curp = ch == '\r' ? '\n' : ch;
-                if(*curp++ == '\n') LINES++;
+            if(etxt < buf+BUF-1){
+                if(ch == '\r'){
+                    cmove(curp, curp+2, etxt-curp);
+                    *curp++ = '\r';
+                    *curp++ = '\n';
+                    LINES++;
+                }else{
+                    cmove(curp, curp+1, etxt-curp);
+                    *curp++ = ch;
+                }
                 if((char*)&undop[1] < ubuf+BUF){
                     /*undop->ch = curp[-1];*/
                     undop->pos = (int)curp-1;
