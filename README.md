@@ -19,11 +19,15 @@ used it a few times when inspecting files saved by other programs.
 Continued with an attempt to port the Kilo editor [1] to CP/M because I wanted
 a source code editor with syntax highlighting. But I soon discovered that the
 Kilo editor was using too much of the 62KB TPA so I decided to write an editor
-that uses less memory. Based most of my design and code on the Text editor [2].
-That became the Lean Editor.
+that uses less memory. Based most of my design and code on the Text editor [2]
+that works well in CP/M. I took away functions that I don't need (new file, open
+file, save file as) and added some that I do need (incremental search, move line
+up/down). That became the Lean Editor.
 
-Also started with a variant of the syntax highlighting from Kilo that I named
-Syntax Highlighter.
+Also wrote the Syntax Highlighter that is a variant of the syntax highlighting
+from Kilo editor [1]. I focused on reducing the memory requirements because I
+want to have as much free memory in TPA as possible if the Syntax Highlighter
+is to be linked with a text editor.
 
 While developing the Lean Editor and Syntax Highlighter I found the micro
 editor [3] written for *nix. It is small and have the search and undo
@@ -74,11 +78,20 @@ operating systems.
 
 Keyboard mapping can be easily changed without compiling the BE
 source code, assembling and linking. There are 13 editor keys that
-are located at 0x0010 - 0x0028 in BE.COM. By editing BE.COM using
-itself(!) you can change these key mappings and save the BE.COM
-that you want. The help text for key mappings are located at
-0x0030 - 0x00ff and you should edit those too while you are at it.
+are located at even adresses 0x0010 - 0x0028 in BE.COM. By editing
+BE.COM using itself(!) you can change these key mappings and save
+the BE.COM that you want. The help text for key mappings are located
+at 0x0030 - 0x00ff and you should edit those too while you are at it.
 Save a backup of the original BE.COM before you start editing.
+
+
+## Aztec C Library (CLIB)
+
+Wrote a few modules that were missing in the Aztec C distribution.
+
+*   'memcpy.c'
+*   'strchr.c'
+*   'strstr.c'
 
 
 ## Lean Editor (LE)
@@ -117,18 +130,41 @@ LE is written for CP/M systems.
 
 ### Summary
 
-Parses and prints a byte buffer with highlighting of syntax.
+Parses and prints a byte buffer with highlighting of syntax for the
+selected language.
 
 ### Functionality 
 
-Keeps state of multi-line comments to enable faster parsing in editors,
-for example Lean Editor or Micro Editor.
+The language is selected by calling shl_select_language() with the name
+of a file as argument, see 'shl.h' for details.
+Ex: shl_select_language("EXAMPLE.C") selects the C language.
+
+The parsing and printing highlighted strings are performed by calling
+shl_highlight() with appropriate arguments, see 'shl.h' for details.
+
+*   Keywords for the language
+    Ex: if, then, else, return
+*   Single-line comments
+    Ex: // single-line comment
+*   Multi-line comments
+    Ex: /* multi-line comment */
+*   Strings
+    Ex: "this is a string"
+*   Numeric constants
+    Ex: 3.14159, 0xFACE, .01
 
 ### Internals 
 
 SHL is based on the syntax highlighting in Kilo editor (kilo) v0.0.1.
-Syntax Highlighter (SHL) is in alpha state. Highlights strings and
-comments in C. Remains to highlight numeric constants and keywords.
+
+Languages need to be defined in 'shl.c', there is no reading of language
+definition files (yet).
+
+Possible to parse and print none, parts or all of the byte buffer so that
+the CPU load can be kept to a minimum.
+
+Keeps state of multi-line comments to enable faster parsing in editors,
+for example Lean Editor.
 
 
 ## Micro Editor (UE)
