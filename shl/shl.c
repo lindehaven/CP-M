@@ -36,19 +36,14 @@
 
 /* DEFINITIONS ------------------------------------------------------------ */
 
-#define PROG_NAME   "Syntax Highlighter"
-#define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.2 2017-12-05"
-#define PROG_SYST   "CP/M"
-#define PROG_TERM   "ANSI Terminal"
-
 #define SH_MLC      1
 #define SH_MLC_END  2
 #define SH_SLC      3
 #define SH_STR      4
-#define SH_NUM      5
-#define SH_KEYW     6
-#define SH_PLAIN    7
+#define SH_STR_END  5
+#define SH_NUM      6
+#define SH_KEYW     7
+#define SH_PLAIN    8
 
 #ifdef COLOR        /* Syntax highlighting with colors.     */
 #define TE_MLC      "\x1b[0;32m"    /* Green                */
@@ -67,9 +62,6 @@
 #define TE_PLAIN    "\x1b[0m"       /* Plain                */
 #define TE_RESET    "\x1b[0m"       /* Reset attributes     */
 #endif
-#define TE_CLEAR    "\x1b[2J"       /* Clear screen         */
-#define TE_HIDE     "\x1b[8m"       /* Hide cursor          */
-#define TE_SHOW     "\x1b[28m"      /* Show cursor          */
 
 typedef char bool;
 #define FALSE       0
@@ -101,7 +93,7 @@ char* shlk_c[] = {
 };
 
 struct shl_type shl_data[] = {
-    { shle_a, shlk_a, ";",  "/*", "*/"},
+    { shle_a, shlk_a, ";",  "", ""},
     { shle_c, shlk_c, "//", "/*", "*/"}
 };
 
@@ -123,7 +115,7 @@ char *lang_file;
     int lang_ix, ext_ix, ext_len;
     char* str_p = NULL;
 
-    int state = SH_PLAIN;
+    state = SH_PLAIN;
     for (lang_ix = 0; lang_ix < SHL_LANGUAGES; lang_ix++) {
         shl_p = &shl_data[lang_ix];
         ext_ix = 0;
@@ -133,7 +125,7 @@ char *lang_file;
                 ext_len = strlen(shl_p->file_ext[ext_ix]);
                 if (shl_p->file_ext[ext_ix][0] == '.' &&
                     str_p[ext_len] == '\0') {
-                    shl_language = ext_ix;
+                    shl_language = lang_ix;
                     return SHL_DONE;
                 }
             }
@@ -156,7 +148,7 @@ char *lang_file;
 int shl_highlight(buf_b, buf_e, buf_p, rows)
 char *buf_b, *buf_e, *buf_p; int rows;
 {
-    int cur_row = 0;
+    int len, cur_row = 0;
     char *buf_s;
 
     if (shl_language == SHL_FAIL)
@@ -164,15 +156,15 @@ char *buf_b, *buf_e, *buf_p; int rows;
     else {
         buf_s = buf_b;
         while (buf_b <= buf_e && cur_row < rows) {
-            if (is_mlcb(buf_b) && state != SH_STR || state == SH_MLC) {
+            if (is_mlcs(buf_b) && state != SH_STR || state == SH_MLC) {
                 state = SH_MLC;
                 while (++buf_b <= buf_e && !is_mlce(buf_b))
-                    set_mlcb(buf_b-1);
-                if (is_mlce(buf_b)) {
+                    set_mlc(buf_b-1);
+                if (len = is_mlce(buf_b)) {
                     state = SH_MLC_END;
-                    clr_mlcb(buf_b);
-                    while (++buf_b <= buf_e && is_mlce(buf_b))
-                        clr_mlcb(buf_b);
+                    clr_mlc(buf_b);
+                    while (++buf_b <= buf_e && len--)
+                        clr_mlc(buf_b);
                 }
             }
             else if (is_slc(buf_b) && state != SH_STR) {
@@ -186,17 +178,18 @@ char *buf_b, *buf_e, *buf_p; int rows;
                     ;
                 while (++buf_b <= buf_e && is_str(buf_b))
                     ;
+                state = SH_STR_END;
             }
-            else if (is_num(buf_b) && state != SH_SLC && state != SH_MLC
+            else if (is_nums(buf_b) && state != SH_SLC && state != SH_MLC
                      && state != SH_STR) {
                 state = SH_NUM;
-                while (buf_b <= buf_e && is_num(buf_b))
+                while (buf_b <= buf_e && is_numc(buf_b))
                     buf_b++;
             }
-            else if (is_keyw(buf_b) && state != SH_SLC && state != SH_MLC
-                     && state != SH_STR) {
+            else if ((len = is_keyw(buf_b)) && state != SH_SLC
+                     && state != SH_MLC && state != SH_STR) {
                 state = SH_KEYW;
-                buf_b++;
+                buf_b += len;
             }
             else if (is_eol(buf_b)) {
                 if (state == SH_SLC)
@@ -214,8 +207,6 @@ char *buf_b, *buf_e, *buf_p; int rows;
             if (buf_b > buf_p) {
                 switch (state) {
                     case SH_MLC :
-                        shl_print(TE_MLC, buf_s, buf_b);
-                        break;
                     case SH_MLC_END :
                         shl_print(TE_MLC, buf_s, buf_b);
                         break;
@@ -223,6 +214,7 @@ char *buf_b, *buf_e, *buf_p; int rows;
                         shl_print(TE_SLC, buf_s, buf_b);
                         break;
                     case SH_STR :
+                    case SH_STR_END :
                         shl_print(TE_STR, buf_s, buf_b);
                         break;
                     case SH_NUM :
@@ -267,29 +259,67 @@ shl_print(marker, buf_s, buf_b) char *marker, *buf_s, *buf_b; {
 }
 
 /* Set as multi-line comment */
-set_mlcb(buf) char *buf; {
+set_mlc(buf) char *buf; {
     *buf = *buf | 0x80;
 }
 
 /* Clear multi-line comment */
-clr_mlcb(buf) char *buf; {
+clr_mlc(buf) char *buf; {
     *buf = *buf & 0x7f;
 }
 
-/* Returns 1 if multi-line comment */
-int is_mlcb(str) char *str; {
-    return (str[-1] != '\\' && (str[0] == '/' && str[1] == '*') ||
-            (str[0] & 0x80));
+/* Returns length of multi-line comment start or 0 if no match */
+int is_mlcs(str) char *str; {
+    char *look_p;
+    int len = 0;
+
+    look_p = shl_data[shl_language].mlc_start;
+    len = strlen(look_p);
+    if (!strncmp(str, look_p, len) && str[-1] != '\\' || (str[0] & 0x80))
+        return len;
+    else
+        return 0;
 }
 
-/* Returns 1 if end of multi-line comment */
+/* Returns length of multi-line comment end or 0 if no match */
 int is_mlce(str) char *str; {
-    return (str[-2] != '\\' && (str[-1] == '*' && str[0] == '/'));
+    char *look_p;
+    int len = 0;
+
+    look_p = shl_data[shl_language].mlc_end;
+    len = strlen(look_p);
+    if (!strncmp(str, look_p, len) && str[-1] != '\\')
+        return len;
+    else
+        return 0;
 }
 
-/* Returns 1 if single line comment */
+/* Returns length of single line comment start or 0 if no match */
 int is_slc(str) char *str; {
-    return  (str[-1] != '\\' && (str[0] == '/' && str[1] == '/'));
+    char *look_p;
+    int len = 0;
+
+    look_p = shl_data[shl_language].slc_start;
+    len = strlen(look_p);
+    if (!strncmp(str, look_p, len) && str[-1] != '\\')
+        return len;
+    else
+        return 0;
+}
+
+/* Returns length of keyword or 0 if no match */
+int is_keyw(str) char *str; {
+    char **look_p;
+    int i, len = 0;
+
+    look_p = shl_data[shl_language].keywords;
+    for (i = 0; look_p[i]; i++) {
+        len = strlen(look_p[i]);
+        if (!strncmp(str, look_p[i], len)
+            && is_sep(str[-1]) && is_sep(str[len]))
+            return len;
+    }
+    return 0;
 }
 
 /* Returns 1 if string */
@@ -297,14 +327,23 @@ int is_str(str) char *str; {
     return (str[-1] != '\\' && str[0] == '\"');
 }
 
-/* Returns 1 if numeric */
-int is_num(str) char *str; {
-    return (isdigit(str[0]));
+/* Returns 1 if numeric start */
+int is_nums(str) char *str; {
+    return (isdigit(str[0]) && is_sep(str[-1])
+            || str[0] == '.' && isdigit(str[1]));
 }
 
-/* Returns 1 if keyword */
-int is_keyw(str) char *str; {
-    return FALSE;
+/* Returns 1 if numeric continues */
+int is_numc(str) char *str; {
+    char ch = tolower(*str);
+    return (isdigit(ch) || ch == '.'
+            || ch == 'x' || (ch >= 'a' && ch <= 'f'));
+}
+
+/* Returns 1 if separator character */
+int is_sep(ch) char ch; {
+    return (isspace(ch) || ch == '\0'
+            || strchr(",.()+-/*=~%<>[]:;", ch) != NULL);
 }
 
 /* Returns 1 if end of line */

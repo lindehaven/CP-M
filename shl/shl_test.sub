@@ -1,5 +1,5 @@
 ; Build and run Syntax Highlighter test
 cc shl_test.c
 as shl_test.asm
-ln -o shl_test.com shl_test.o shl.o strstr.o c.lib
+ln -o shl_test.com shl_test.o shl.o strchr.o strstr.o c.lib
 shl_test.com

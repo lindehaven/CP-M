@@ -4,7 +4,7 @@ CCC = cc.com
 ASM = as.com
 LNK = ln.com
 
-all:	clib
+all:	clib clibtest
 
 clib:
 	$(CCC) memcpy.c
@@ -13,3 +13,8 @@ clib:
 	$(ASM) memcpy.asm
 	$(ASM) strchr.asm
 	$(ASM) strstr.asm
+
+clibtest:
+	$(CCC) clibtest.c
+	$(ASM) clibtest.asm
+	$(LNK) -o clibtest.com clibtest.o memcpy.o strchr.o strstr.o c.lib

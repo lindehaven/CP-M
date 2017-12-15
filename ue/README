@@ -69,7 +69,7 @@ Compiled with Aztec C Version 1.06d from Manx Software:
     as ue.asm
     ln -o ue.com ue.o c.lib
 
-UE.COM size:    11k
+UE.COM size:    12k
 
 Operation:
 
@@ -123,6 +123,7 @@ Written keyPressed function in Intel 8080 assembly for CP/M.
 Stripped out CP/M end-of-file (0x1A) characters.
 Made use of ANSI terminals' clear-to-end-of-line.
 Added backspace key for deleting character to the left.
+Increased BUF to 20KB.
 
 1.25 Sept. 6, 2002
 Initial release 'OOPS' fix.

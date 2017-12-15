@@ -1,8 +1,6 @@
 /*
  *  Syntax Higlighter -- tests highlighted source code
- *
- *  Copyright (C) 2017 Lars Lindehaven <lars dot lindehaven at gmail dot com>
- *  All rights reserved.
+ *  Copyright (C) 2017 Lars Lindehaven
  *
  */
 
@@ -15,9 +13,9 @@ int main(argc, argv) int argc; char* argv[];
     int passed = 0;
     int failed = 0;
 
-    char *code1 = "\nmain(argc,argv) /* main() is not a keyword in this comment */\n{\n  int rc = 12345;\n  printf(\"Hello \"world\"!\");\n  /* Here starts a\n     multi-line comment\n";
-    char *code2 = "     ending here!\n   */\n  rc = 67890;\n  return rc;\n}\n\n";
-    char *mlcb = "/*";
+    char *code1 = "\nmain(argc,argv) // switch else case\n{\n  int intchar=0xaf;\n  float pi_float=3.14;\n  printf(\"Hello \"world\"!\");\n  /* Here starts a\n     multi-line comment\n";
+    char *code2 = "     ending here!\n   */\n  if (sizeof(pi_float) > .3)\n    intchar = 67890;\n  return intchar;\n}\n\n";
+    char *mlcs = "/*";
     char *mlce = "*/";
     char *slc = "//";
     char *str = "\"";
@@ -28,35 +26,39 @@ int main(argc, argv) int argc; char* argv[];
     printf("\n Test of modules for Syntax Highlighter.");
 
     printf("\n  Testcase %2d: shl_set_language()  ", ++tcno);
-    if ((res = shl_set_language("FILEIS.???")) == -1)
+    if ((res = shl_set_language("FILEIS.???")) == SHL_FAIL)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
     printf("\n  Testcase %2d: shl_highlight()     ", ++tcno);
-    if ((res = shl_highlight(buf_b,buf_e,buf_p,10)) == -1)
+    if ((res = shl_highlight(buf_b,buf_e,buf_p,10)) == SHL_FAIL)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
     printf("\n  Testcase %2d: shl_set_language()  ", ++tcno);
-    if ((res = shl_set_language("FILEIS.C")) == 0)
+    if ((res = shl_set_language("FILEIS.C")) == SHL_DONE)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
-    printf("\n  Testcase %2d: is_mlcb()           ", ++\tcno);
-    if ((res = is_mlcb(mlcb)))
-    {++passed; printf("Passed");} else {++failed; printf("Failed");}
-
-    printf("\n  Testcase %2d: !is_mlce()          ", ++\tcno);
-    if ((res = !is_mlce(mlce)))
+    printf("\n  Testcase %2d: is_mlcs()           ", ++\tcno);
+    if ((res = is_mlcs(mlcs)) == 2)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
     printf("\n  Testcase %2d: is_mlce()           ", ++\tcno);
-    if ((res = is_mlce(&mlce[1])))
+    if ((res = is_mlce(mlce)) == 2)
+    {++passed; printf("Passed");} else {++failed; printf("Failed");}
+
+    printf("\n  Testcase %2d: is_mlce()           ", ++\tcno);
+    if ((res = is_mlce(&mlce[1])) == 0)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
     printf("\n  Testcase %2d: is_slc()            ", ++\tcno);
-    if ((res = is_slc(slc)))
+    if ((res = is_slc(slc)) == 2)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
     printf("\n  Testcase %2d: is_str()            ", ++\tcno);
     if ((res = is_str(str)))
+    {++passed; printf("Passed");} else {++failed; printf("Failed");}
+
+    printf("\n  Testcase %2d: is_keyw()           ", ++\tcno);
+    if ((res = is_keyw("bool four=true;")) == 4)
     {++passed; printf("Passed");} else {++failed; printf("Failed");}
 
     printf("\n  Testcase %2d: Verify that this looks correct:\n", ++tcno);

@@ -14,4 +14,4 @@ le:
 leshl:
 	$(CCC) -dSHL le.c
 	$(ASM) le.asm
-	$(LNK) -o le.com le.o shl.o strstr.o c.lib
+	$(LNK) -o le.com le.o shl.o strchr.o strstr.o c.lib

@@ -1,8 +1,6 @@
 /*
  *  Syntax Highlighter -- prints highlighted source code
- *
- *  Copyright (C) 2017 Lars Lindehaven <lars dot lindehaven at gmail dot com>
- *  All rights reserved.
+ *  Copyright (C) 2017 Lars Lindehaven
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are
