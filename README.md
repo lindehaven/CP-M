@@ -1,5 +1,18 @@
 # CP/M
 
+![CP/M Inside](https://github.com/lindehaven/CP-M/images/cpm_inside.png)
+
+From [Wikipedia|https://en.wikipedia.org/wiki/CP/M]:
+> CP/M, originally standing for Control Program/Monitor and later Control
+> Program for Microcomputers, is a mass-market operating system created for
+> Intel 8080/85-based microcomputers by Gary Kildall of Digital Research, Inc.
+> Initially confined to single-tasking on 8-bit processors and no more than 64
+> kilobytes of memory, later versions of CP/M added multi-user variations and
+> were migrated to 16-bit processors.
+
+![Digital Research](https://github.com/lindehaven/CP-M/images/digital_research.png)
+
+
 ## Background
 
 I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C and
