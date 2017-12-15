@@ -1,6 +1,6 @@
 # CP/M
 
-![CP/M Inside](https://github.com/lindehaven/CP-M/images/cpm_inside.png)
+![CP/M Inside](https://github.com/lindehaven/CP-M/blob/master/images/cpm_inside.png)
 
 From [Wikipedia|https://en.wikipedia.org/wiki/CP/M]:
 > CP/M, originally standing for Control Program/Monitor and later Control
@@ -10,7 +10,7 @@ From [Wikipedia|https://en.wikipedia.org/wiki/CP/M]:
 > kilobytes of memory, later versions of CP/M added multi-user variations and
 > were migrated to 16-bit processors.
 
-![Digital Research](https://github.com/lindehaven/CP-M/images/digital_research.png)
+![Digital Research](https://github.com/lindehaven/CP-M/blob/master/images/digital_research.png)
 
 
 ## Background
