@@ -35,13 +35,35 @@
 #include "ctype.h"
 #include "libc.h"
 
-#define BUF (1024*20)
-#define MODE 0666
-#define TABSZ 8
-#define TABM TABSZ-1
+#define KEY_RUP     ('E' & 0X1F)
+#define KEY_RDN     ('X' & 0X1F)
+#define KEY_CLT     ('S' & 0X1F)
+#define KEY_CRT     ('D' & 0X1F)
+#define KEY_WLT     ('A' & 0X1F)
+#define KEY_WRT     ('F' & 0X1F)
+#define KEY_LBEG    ('[' & 0X1F)
+#define KEY_LEND    (']' & 0X1F)
+#define KEY_PUP     ('R' & 0X1F)
+#define KEY_PDN     ('C' & 0X1F)
+#define KEY_FBEG    ('T' & 0X1F)
+#define KEY_FEND    ('B' & 0X1F)
+#define KEY_SEARCH  ('L' & 0X1F)
+#define KEY_TAB     ('I' & 0X1F)
+#define KEY_LINS    ('M' & 0X1F)
+#define KEY_DEL     ('G' & 0X1F)
+#define KEY_RUB     ('H' & 0X1F)
+#define KEY_BS      (0X7F)
+#define KEY_LCUT    ('Y' & 0X1F)
+#define KEY_UNDO    ('U' & 0X1F)
+#define KEY_FSAVE   ('W' & 0X1F)
+#define KEY_FQUIT   ('Q' & 0X1F)
 
-#define MAXLINES 25
-#define MAXCOLS 80
+#define BUF         (1024*20)
+#define MODE        0666
+#define TABSZ       8
+#define TABM        TABSZ-1
+#define MAXLINES    25
+#define MAXCOLS     80
 
 int COLS = MAXCOLS;
 int LINES = 1;
@@ -49,8 +71,6 @@ int done;
 int row, col;
 
 char str[MAXCOLS];
-char prompt[]="Look for: ";
-char sstring[MAXCOLS];
 char ubuf[BUF];
 
 char buf[BUF];
@@ -93,22 +113,23 @@ void look();
 void undo();
 void quit();
 void nop();
+void display();
 
 char key[] = { 
-    'S' & 0X1F, 'X' & 0X1F, 'E' & 0X1F, 'D' & 0X1F,
-    'A' & 0X1F, 'C' & 0X1F, 'R' & 0X1F, 'F' & 0X1F,
-    '[' & 0X1F, ']' & 0X1F, 'T' & 0X1F, 'B' & 0X1F,
-    'G' & 0X1F, 'H' & 0X1F, 0x7f,       'Y' & 0X1F,
-    'U' & 0X1F, 'W' & 0X1F, 'L' & 0X1F, 'Q' & 0X1F,
+    KEY_CLT,    KEY_RDN,    KEY_RUP,    KEY_CRT,
+    KEY_WLT,    KEY_PDN,    KEY_PUP,    KEY_WRT,
+    KEY_LBEG,   KEY_LEND,   KEY_FBEG,   KEY_FEND,
+    KEY_DEL,    KEY_RUB,    KEY_BS,     KEY_LCUT,
+    KEY_UNDO,   KEY_FSAVE,  KEY_SEARCH, KEY_FQUIT,
     '\0'
 };
 
 void (*func[])() = {
-    left, down, up, right, 
-    wleft, pgdown, pgup, wright,
-    lnbegin, lnend, top, bottom, 
-    delete, bksp, bksp, delrol,
-    undo, file, look, quit,
+    left,       down,       up,         right, 
+    wleft,      pgdown,     pgup,       wright,
+    lnbegin,    lnend,      top,        bottom, 
+    delete,     bksp,       bksp,       delrol,
+    undo,       file,       look,       quit,
     nop
 };
 
@@ -312,30 +333,42 @@ void file() {
 }
 
 void look() {
-    char c;
-    int i = strlen(sstring);
-    gotoxy(1,1);
-    clrtoeol();
-    putstr(prompt);
-    putstr(sstring);
+    static char sstring[MAXCOLS-10] = "";
+    static int slen = 0;
+    char ch, *foundp = curp;
     do {
-        c = (char)keyPressed();
-        if(c == '\b' || c == 0x7f){
-            c = '\b';
-            if(!i) continue;
-            i--; emitch(c); emitch(' ');
-        } else {
-            if(i == MAXCOLS) continue;
-            sstring[i++] = c;
+        gotoxy(1,MAXLINES+1); clrtoeol();
+        putstr("Look for:"); putstr(sstring);
+        ch = keyPressed();
+        if (slen > 0 && (ch == KEY_RUB || ch == KEY_BS)) {
+            --slen;
+            sstring[slen] = 0;
+            emitch('\b'); emitch(' ');
+        } else if (slen < MAXCOLS-11 && ch > 0x1f) {
+            sstring[slen] = ch;
+            ++slen;
+            sstring[slen] = 0;
+            emitch(ch);
         }
-        if (c != 0x1b) emitch(c);
-    } while(c != 0x1b && c != '\n' && c != 0x0c);
-    sstring[--i] = 0;
-    if(c != 0x1b){
-        do{
-            right();
-        } while(curp < etxt && strncmp(curp,sstring,i));
-    }
+        if (slen > 0) {
+            if (ch == KEY_SEARCH)
+                right();
+            while (curp < etxt-1 && strncmp(curp, sstring, slen))
+                right();
+            if (curp < etxt-1) {
+                foundp = curp;
+                page = curp;
+                epage = curp+1;
+                lnbegin();
+                display();
+                curp = foundp;
+            } else {
+                top();
+                display();
+            }
+        }
+    } while (ch != 0x1b && ch != KEY_CLT && ch != KEY_CRT &&
+             ch != KEY_RUP && ch != KEY_RDN);
 }
 
 void quit() {

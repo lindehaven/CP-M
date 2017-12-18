@@ -77,14 +77,13 @@ ue requires a file name. If a file name is not provided, ue will refuse to
 run. If it exists, the file is opened for editing, if not, the file is created
 by writing the newly entered text to disk.
 
-There is no status line. The search prompt pre-empts the first line.
+There is no status line. The search prompt is shown at the last line.
 
 Text buffer size, undo buffer size, horizontal width, vertical height and tab
 size are fixed. Change the source and compile to suit your needs.
 
-The search string input can be terminated by <Esc>, <Enter> or ^L. 
-
-<Esc> aborts the search function, <Enter> or ^L proceeds with the search. 
+<Esc>, cursor up, cursor left, cursor right or cursor down aborts the search,
+^L proceeds with the search. 
 
 'Search again' is a '^L^L' sequence away.
 
