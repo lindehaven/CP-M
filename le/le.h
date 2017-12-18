@@ -43,14 +43,14 @@
 #define KEY_SEARCH   12     /* ^L       Search string incrementally (look)  */
 
 /* Editing ---------------------------------------------------------------- */
-#define KEY_TABW     21     /* ^U       Change tab width (2-8 spaces)       */
+#define KEY_TABW     21     /* ^U       Change tab width (1-8 spaces)       */
 #define KEY_TAB       9     /* ^I       Insert tab width spaces             */
 #define KEY_LINS     13     /* ^M       Insert new line                     */
 #define KEY_DEL       7     /* ^G       Delete character to the right       */
 #define KEY_RUB       8     /* ^H       Delete character to the left        */
 #define KEY_BS      127     /* BACK     Delete character to the left        */
-#define KEY_LCUT     15     /* ^O       Delete line                         */
-#define KEY_PASTE    16     /* ^P       Paste deleted text from clipboard   */
+#define KEY_LCUT     15     /* ^O       Move line to paste buffer           */
+#define KEY_PASTE    16     /* ^P       Insert line(s) from paste buffer    */
 #define KEY_LUP      25     /* ^Y       Move line up                        */
 #define KEY_LDN       2     /* ^B       Move line down                      */
 

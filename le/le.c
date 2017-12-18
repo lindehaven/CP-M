@@ -35,19 +35,19 @@
 
 #define MAX_FNAME   20
 #define MAX_EBLIN   2000
-#define MAX_CBLIN   100
+#define MAX_PBLIN   50
 #define SY_ROW1     0
 #define SY_ROWS     1
 #define SY_COLS     (TERM_COLS)
 #define SY_COLM     0
 #define SY_COLF     1
-#define SY_COLI     (SY_COLS - 35)
+#define SY_COLI     (SY_COLS - 36)
 #define ED_ROW1     SY_ROWS
 #define ED_ROWS     (TERM_ROWS - ED_ROW1)
 #define ED_COLS     (TERM_COLS)
 #define MAX_ED_COLS (TERM_COLS)
 #define ED_TABS     (TERM_TABS)
-#define MIN_ED_TABS 2
+#define MIN_ED_TABS 1
 #define MAX_ED_TABS 8
 
 
@@ -56,11 +56,10 @@
 char            fname[MAX_FNAME];
 char            *eb_tmp;
 unsigned int    *eb_arr;
-unsigned int    *cb_arr;
+unsigned int    *pb_arr;
 int             eb_tot;
-int             cb_tot;
+int             pb_tot;
 int             eb_cur;
-int             cb_cur;
 unsigned int    eb_eds;
 int             es_row;
 int             es_col;
@@ -202,6 +201,8 @@ edGetLine() {
         }
         if (upd_sys) {
             upd_sys = 0;
+            sysClear();
+            sysPutFileName();
             sysPutInfo(eb_eds, es_tab, eb_cur, eb_tot, es_col, len);
         }
         if (upd_pos) {
@@ -325,7 +326,7 @@ edGetLine() {
                 }
                 break;
             case KEY_DEL :
-                /*TODO: Move deleted character to clipboard */
+                /*TODO: Move deleted character to paste buffer */
                 if (es_col < len) {
                     strcpy(eb_tmp + es_col, eb_tmp + es_col + 1);
                     --len;
@@ -334,14 +335,13 @@ edGetLine() {
                     ++eb_eds;
                     ++spc;
                 } else if (eb_cur < eb_tot -1) {
-                    ++eb_eds;
                     run = 0;
                 }
                 ++upd_pos;
                 break;
             case KEY_RUB :
             case KEY_BS :
-                /*TODO: Move deleted character to clipboard */
+                /*TODO: Move deleted character to paste buffer */
                 if (es_col) {
                     strcpy(eb_tmp + es_col - 1, eb_tmp + es_col);
                     --es_col;
@@ -352,16 +352,13 @@ edGetLine() {
                     ++spc;
                     putchar('\b');
                 } else if (eb_cur) {
-                    ++eb_eds;
                     run = 0;
                 }
                 ++upd_pos;
                 break;
             case KEY_LCUT :
-                /*TODO: Delete line (and move to clipboard) */
-                break;
             case KEY_PASTE :
-                /*TODO: Paste deleted text from clipboard */
+                run = 0;
                 break;
             case KEY_LUP :
                 if (eb_cur) {
@@ -412,17 +409,17 @@ int edInit() {
     int i;
     eb_tmp = malloc(MAX_ED_COLS + 2);
     eb_arr = malloc(MAX_EBLIN * 2);
-    cb_arr = malloc(MAX_CBLIN * 2);
-    if (!eb_tmp || !eb_arr || !cb_arr) {
+    pb_arr = malloc(MAX_PBLIN * 2);
+    if (!eb_tmp || !eb_arr || !pb_arr) {
         fprintf(stderr, "Not enough memory!");
         return -1;
     }
     *eb_tmp = 0;
     for (i = 0; i < MAX_EBLIN; ++i)
         eb_arr[i] = NULL;
-    for (i = 0; i < MAX_CBLIN; ++i)
-        cb_arr[i] = NULL;
-    eb_tot = cb_tot = eb_cur = cb_cur = eb_eds = 0;
+    for (i = 0; i < MAX_PBLIN; ++i)
+        pb_arr[i] = NULL;
+    eb_tot = pb_tot = eb_cur = eb_eds = 0;
     es_row = es_col = 0;
     es_tab = ED_TABS;
     return 0;
@@ -518,6 +515,7 @@ delChrLeft() {
     strcpy(p, eb_arr[eb_cur - 1]);
     strcat(p, eb_tmp);
     --eb_tot;
+    ++eb_eds;
     free(eb_arr[eb_cur]);
     free(eb_arr[eb_cur - 1]);
     for (i = eb_cur; i < eb_tot; ++i)
@@ -546,6 +544,7 @@ delChrRight() {
     strcpy(p, eb_tmp);
     strcat(p, eb_arr[eb_cur + 1]);
     --eb_tot;
+    ++eb_eds;
     free(eb_arr[eb_cur]);
     free(eb_arr[eb_cur + 1]);
     for (i = eb_cur + 1; i < eb_tot; ++i)
@@ -558,11 +557,46 @@ delChrRight() {
 }
 
 cutLine() {
-    ;
+    int len_cur = strlen(eb_arr[eb_cur]);
+    char *p1;
+    int i;
+    if (pb_tot > MAX_PBLIN - 1 || !(p1 = malloc(len_cur + 1))) {
+            errMsgPBFull(); return;
+    }
+    if (eb_cur < eb_tot) {
+        strcpy(p1, eb_arr[eb_cur]);
+        pb_arr[pb_tot] = p1;
+        pb_tot++;
+        for (i = eb_cur; i < eb_tot; ++i)
+            eb_arr[i] = eb_arr[i + 1];
+        free(eb_arr[eb_tot]);
+        eb_arr[eb_tot--] = NULL;
+        ++eb_eds;
+        edUpdate(0, eb_cur - es_row);
+    }
 }
 
 paste() {
-    ;
+    int i, j, len_cbcur;
+    int cur = eb_cur;
+    char *p1;
+    for (j = 0; j < pb_tot; j++) {
+        len_cbcur = strlen(pb_arr[j]);
+        if (!(p1 = malloc(len_cbcur + 1))) {
+            errMsgMemory(); return;
+        }
+        for (i = eb_tot + 1; i > cur; --i)
+            eb_arr[i] = eb_arr[i - 1];
+        strcpy(p1, pb_arr[j]);
+        eb_arr[cur] = p1;
+        ++eb_tot;
+        ++cur;
+        ++eb_eds;
+        free(pb_arr[j]);
+        pb_arr[j] = NULL;
+    }
+    pb_tot = 0;
+    edUpdate(0, eb_cur - es_row);
 }
 
 mvLineUp() {
@@ -684,9 +718,9 @@ center() {
 nextChar() {
     if (es_col < strlen(eb_arr[eb_cur])) {
         ++es_col;
-    } else {
-        es_col = 0;
+    } else if (eb_cur < eb_tot){
         eb_cur++;
+        es_col = 0;
     }
 }
 
@@ -768,7 +802,7 @@ int sysMsgConf(s) char *s; {
 sysPutFileName() {
     sysClear();
     scrPosCur(SY_ROW1, SY_COLF);
-    putString("File:");
+    putString("F:");
     putString(fname[0] ? fname : "????????.???");
     scrChrNormal();
 }
@@ -776,7 +810,7 @@ sysPutFileName() {
 sysPutSearchString(s, len) char *s; int len; {
     sysClear();
     scrPosCur(SY_ROW1, SY_COLF);
-    putString("Search:");
+    putString("S:");
     while (len--)
         putchar(*s++ & 0x7f);
     scrChrNormal();
@@ -785,10 +819,11 @@ sysPutSearchString(s, len) char *s; int len; {
 sysPutInfo(eds, tab, cur, tot, col, len) int eds, tab, cur, tot, col, len; {
     scrChrInverted();
     scrPosCur(SY_ROW1, SY_COLI);
-    printf("E:%05d  ", eds);
-    printf("T:%d  ", tab);
-    printf("R:%04d/%04d  ", cur + 1, tot);
-    printf("C:%02d/%02d ", col + 1, len);
+    printf("P%02d  ", pb_tot);
+    printf("E%05d  ", eds);
+    printf("T%d  ", tab);
+    printf("R%04d/%04d  ", cur + 1, tot);
+    printf("C%02d/%02d ", col + 1, len);
     scrChrNormal();
 }
 
@@ -913,6 +948,10 @@ errMsgClose() {
 
 errMsgMemory() {
     errMsg("Not enough memory!");
+}
+
+errMsgPBFull() {
+    errMsg("Paste buffer is full!");
 }
 
 /* ANSI SCREEN */

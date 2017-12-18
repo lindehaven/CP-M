@@ -1,6 +1,0 @@
-TODO
-
-    *   Implement Cut lines to clipboard
-    *   Implement Cut characters to clipboard
-    *   Implement Paste from clipboard
-    *   Implement Undo

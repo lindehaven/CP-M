@@ -2,7 +2,7 @@
 
 ![CP/M Inside](https://github.com/lindehaven/CP-M/blob/master/images/cpm_inside.png)
 
-From [Wikipedia|https://en.wikipedia.org/wiki/CP/M]:
+From Wikipedia:
 > CP/M, originally standing for Control Program/Monitor and later Control
 > Program for Microcomputers, is a mass-market operating system created for
 > Intel 8080/85-based microcomputers by Gary Kildall of Digital Research, Inc.
@@ -35,7 +35,7 @@ Kilo editor was using too much of the 62KB TPA so I decided to write an editor
 that uses less memory. Based most of my design and code on the Text editor [2]
 that works well in CP/M. I took away functions that I don't need (new file, open
 file, save file as) and added some that I do need (incremental search, move line
-up/down). That became the Lean Editor.
+up/down, cut/paste lines). That became the Lean Editor.
 
 Also wrote the Syntax Highlighter that is a variant of the syntax highlighting
 from Kilo editor [1]. I focused on reducing the memory requirements because I
@@ -58,16 +58,7 @@ References:
 
 ## Binary Editor (BE)
    
-### Summary 
-
-*   Digital Research CP/M systems
-*   ANSI terminal
-*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
-    Manx Software Systems
-*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
-    and Andreas Gerlich.
-
-### Functionality 
+### Summary
 
 Binary Editor (BE) enables hexadecimal and ASCII editing of binary
 files up to 32 KB in size.
@@ -84,11 +75,6 @@ Any unsaved edits are marked with inverse video on the terminal
 screen. The user must also confirm if unsaved edits shall be saved
 or discarded when exiting BE.
 
-### Internals 
-
-BE is written for CP/M systems but can easily be ported to other
-operating systems.
-
 Keyboard mapping can be easily changed without compiling the BE
 source code, assembling and linking. There are 13 editor keys that
 are located at even adresses 0x0010 - 0x0028 in BE.COM. By editing
@@ -97,19 +83,9 @@ the BE.COM that you want. The help text for key mappings are located
 at 0x0030 - 0x00ff and you should edit those too while you are at it.
 Save a backup of the original BE.COM before you start editing.
 
+### Internals 
 
-## Aztec C Library (CLIB)
-
-Wrote a few modules that were missing in the Aztec C distribution.
-
-*   'memcpy.c'
-*   'strchr.c'
-*   'strstr.c'
-
-
-## Lean Editor (LE)
-   
-### Summary 
+Copyright (c) 2017 Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
@@ -118,7 +94,19 @@ Wrote a few modules that were missing in the Aztec C distribution.
 *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
     and Andreas Gerlich.
 
-### Functionality 
+
+## Aztec C Library (CLIB)
+
+A few modules that were missing in the Aztec C distribution.
+
+*   `memcpy.c`
+*   `strchr.c`
+*   `strstr.c`
+
+
+## Lean Editor (LE)
+   
+### Summary 
 
 Lean Editor (LE) enables easy editing of small source code files.
 Source code files are limited to 2000 lines with lengths less than
@@ -132,11 +120,21 @@ running on an Intel i5 at 2.6 GHz. However, the performance will
 probably be too low in a real CP/M environment with a Zilog Z80 or
 Intel Intel 8080 CPU running at a few MHz. Just saying.
 
-### Internals 
+See `le/readme.txt` file for details.
 
-LE is based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+### Internals
+
+Copyright (c) 2017 Lars Lindehaven.
+
+*   Digital Research CP/M systems
+*   ANSI terminal
+*   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
+    Manx Software Systems
+*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+    and Andreas Gerlich.
+
+Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
 Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
-LE is written for CP/M systems.
 
 
 ## Syntax Highlighter (SHL)
@@ -146,32 +144,21 @@ LE is written for CP/M systems.
 Parses and prints a byte buffer with highlighting of syntax for the
 selected language.
 
-### Functionality 
-
 The language is selected by calling shl_select_language() with the name
-of a file as argument, see 'shl.h' for details.
-Ex: shl_select_language("EXAMPLE.C") selects the C language.
+of a file as argument, see `shl/shl.h` for details.
+Ex: `shl_select_language("EXAMPLE.C")` selects the C language.
 
 The parsing and printing highlighted strings are performed by calling
-shl_highlight() with appropriate arguments, see 'shl.h' for details.
+`shl_highlight()` with appropriate arguments, see `shl/shl.h` for details.
 
-*   Keywords for the language
-    Ex: if, then, else, return
-*   Single-line comments
-    Ex: // single-line comment
-*   Multi-line comments
-    Ex: /* multi-line comment */
-*   Strings
-    Ex: "this is a string"
-*   Numeric constants
-    Ex: 3.14159, 0xFACE, .01
+*   Keywords for the language, ex: `if`, `then`, `else`, `return`
+*   Single-line comments, ex: `// single-line comment`
+*   Multi-line comments, ex: `/* multi-line comment */`
+*   Strings, ex: `"this is a string"`
+*   Numeric constants, ex: `3.14159`, `0xFACE`, `.01`
 
-### Internals 
-
-SHL is based on the syntax highlighting in Kilo editor (kilo) v0.0.1.
-
-Languages need to be defined in 'shl.c', there is no reading of language
-definition files (yet).
+Languages need to be defined in `shl/shl.c`, there is no reading of
+language definition files (yet).
 
 Possible to parse and print none, parts or all of the byte buffer so that
 the CPU load can be kept to a minimum.
@@ -179,10 +166,22 @@ the CPU load can be kept to a minimum.
 Keeps state of multi-line comments to enable faster parsing in editors,
 for example Lean Editor.
 
+### Internals
+
+Copyright (C) 2017 Lars Lindehaven
+
+Work based on the Program Kilo editor, v0.1.1.
+Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
 
 ## Micro Editor (UE)
 
 ### Summary 
+
+See `ue/README` file.
+
+### Internals 
+
+Public Domain 2017 (C) by Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
@@ -191,10 +190,8 @@ for example Lean Editor.
 *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
     and Andreas Gerlich.
 
-### Functionality 
+Work based on the Micro editor, v1.25 by Terry Loveall.
+Public Domain 2002 (C) by Terry Loveall.
+Public Domain 1991 by Anthony Howe.  All rights released.
 
-See ue/README file.
-
-### Internals 
-
-See ue/README file.
+Also see `ue/README` file.

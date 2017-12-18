@@ -3,13 +3,36 @@
     
     Summary ---------------------------------------------------------------
     
-        *   Digital Research CP/M systems
-        *   Wordstar key mapping
-        *   ANSI terminal
-        *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
-            by Manx Software Systems
-        *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
-            and Andreas Gerlich.
+        Lean Editor (LE) enables easy editing of small source code files.
+        Source code files are limited to 2000 lines with lengths less than
+        80 characters. The reasons are to simplify the design of LE and
+        that source code files should be small.
+        
+        To give more help for programmers, LE can be linked with the
+        Syntax Highlighter (SHL) module to highlight source code while
+        editing. This feature has been tested in the YAZE-AG simulator
+        running on an Intel i5 at 2.6 GHz. However, the performance will
+        probably be too low in a real CP/M environment with a Zilog Z80 or
+        Intel Intel 8080 CPU running at a few MHz. Just saying.
+
+    Screen Layout ---------------------------------------------------------
+    
+        The first row on top of the screen is called the system line. It
+        displays:
+        *   F   which file that is being edited
+        *   P   how many lines there are in the paste buffer
+        *   E   how many edits that have been made
+        *   T   the tab width
+        *   R   current/last row
+        *   C   current/last column
+        Example:
+            `F:LE.C                  P04  E00056  T4  R0094/1000  C09/68`
+
+        If an incremental string search is active then it is shown
+        instead of the file name:
+        *   S   incremental search string
+        Example:
+            `S:for (i =              P00  E00119  T4  R0382/1000  C21/52`
 
     Navigation ------------------------------------------------------------
     
@@ -30,15 +53,15 @@
 
     Editing ---------------------------------------------------------------
     
-        ^U      Change tab width (2-8 spaces)
+        ^U      Change tab width (1-8 spaces)
         ^I      Insert tab width spaces
         ^M      Insert new line
         ^G      Delete character to the right
         DEL     Delete character to the right
         ^H      Delete character to the left
         BACK    Delete character to the left
-        ^O      Delete line
-        ^P      Paste deleted text from clipboard
+        ^O      Move line to paste buffer
+        ^P      Insert line(s) from paste buffer
         ^Y      Move line up
         ^B      Move line down
 
@@ -47,30 +70,25 @@
         ^W      Write file (save)
         ^Q      Quit (exit)
 
-    Functionality ---------------------------------------------------------
-    
-        Lean Editor (LE) enables easy editing of small source code files.
-        Source code files are limited to 2000 lines with lengths less than
-        80 characters. The reasons are to simplify the design of LE and
-        that source code files should be small.
-        
-        To give more help for programmers, LE can be linked with the
-        Syntax Highlighter (SHL) module to highlight source code while
-        editing. This feature has been tested in the YAZE-AG simulator
-        running on an Intel i5 at 2.6 GHz. However, the performance will
-        probably be too low in a real CP/M environment with a Zilog Z80 or
-        Intel Intel 8080 CPU running at a few MHz. Just saying.
-        
     Internals -------------------------------------------------------------
     
-        LE is based on the Program Text editor (te) v1.08 from 05 Jul 2017.
-        Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
-        LE is written for CP/M systems.
+        *   Digital Research CP/M systems
+        *   Wordstar key mapping
+        *   ANSI terminal
+        *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
+            by Manx Software Systems
+        *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+            and Andreas Gerlich.
 
     License ---------------------------------------------------------------
 
+        Copyright (C) 2017 Lars Lindehaven.
+        
+        Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+        Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
+        
         This program is free software; you can redistribute it and/or
-        modify it nder the terms of the GNU General Public License as
+        modify it under the terms of the GNU General Public License as
         published by the ree Software Foundation; either version 2, or
         (at your option) any later version.
 
