@@ -19,20 +19,26 @@
     
         The first row on top of the screen is called the system line. It
         displays:
+        
         *   F   which file that is being edited
         *   P   how many lines there are in the paste buffer
         *   E   how many edits that have been made
         *   T   the tab width
         *   R   current/last row
         *   C   current/last column
+        
         Example:
-            `F:LE.C                  P04  E00056  T4  R0094/1000  C09/68`
+        
+            F:LE.C                  P04  E00056  T4  R0094/1000  C09/68
 
         If an incremental string search is active then it is shown
         instead of the file name:
+        
         *   S   incremental search string
+        
         Example:
-            `S:for (i =              P00  E00119  T4  R0382/1000  C21/52`
+        
+            S:for (i =              P00  E00119  T4  R0382/1000  C21/52
 
     Navigation ------------------------------------------------------------
     
