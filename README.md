@@ -43,9 +43,8 @@ want to have as much free memory in TPA as possible if the Syntax Highlighter
 is to be linked with a text editor.
 
 While developing the Lean Editor and Syntax Highlighter I found the micro
-editor [3] written for *nix. It is small and have the search and undo
-functions that is needed in any source code editor. So I ported ue to CP/M to
-test it. Works ok.
+editor [3] written for *nix. It is small. I ported ue to CP/M to test it.
+Added the undo functionality and then some. Works ok.
 
 References:
 
@@ -63,7 +62,7 @@ References:
 Binary Editor (BE) enables hexadecimal and ASCII editing of binary
 files up to 32 KB in size.
 
-CP/M programs starts at address 0x0100 by default so this is also
+CP/M programs starts at address `0x0100` by default so this is also
 the address offset used by BE as default. This can be changed by
 the user when starting BE.
 
@@ -77,11 +76,11 @@ or discarded when exiting BE.
 
 Keyboard mapping can be easily changed without compiling the BE
 source code, assembling and linking. There are 13 editor keys that
-are located at even adresses 0x0010 - 0x0028 in BE.COM. By editing
-BE.COM using itself(!) you can change these key mappings and save
-the BE.COM that you want. The help text for key mappings are located
-at 0x0030 - 0x00ff and you should edit those too while you are at it.
-Save a backup of the original BE.COM before you start editing.
+are located at even adresses `0x0010 - 0x0028` in `BE.COM`. By editing
+`BE.COM` using itself(!) you can change these key mappings and save
+the `BE.COM` that you want. The help text for key mappings are located
+at `0x0030 - 0x00ff` and you should edit those too while you are at it.
+Save a backup of the original `BE.COM` before you start editing.
 
 ### Internals 
 
@@ -177,7 +176,7 @@ Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
 
 ### Summary 
 
-See `ue/README` file.
+See `ue/readme.txt` file.
 
 ### Internals 
 
@@ -194,4 +193,4 @@ Work based on the Micro editor, v1.25 by Terry Loveall.
 Public Domain 2002 (C) by Terry Loveall.
 Public Domain 1991 by Anthony Howe.  All rights released.
 
-Also see `ue/README` file.
+Also see `ue/readme.txt` and `ue/README` files.
