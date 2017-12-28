@@ -19,7 +19,6 @@
 	^B	bottom of file
 	^G	delete cursor char
 	^H	delete previous char
-    BS  delete previous char
 	^Y	delete rest of line
 	^U	undo
 	^W	write file to disk
@@ -39,7 +38,7 @@ September 5, 2002. Terry Loveall
 
 Please send fixes, comments and flames to: <loveall@qwest.net>
 
-Installing on *nix:
+Installing:
 
 ue comes as source only. Compile with:
 
@@ -57,33 +56,20 @@ ue size without strip:	18k
 ue size with strip:		6.3k
 ue size with sstrip:	4.6k
 
-Installing on CP/M:
-
-ue comes with both source and binary. The binary UE.COM contains Intel 8080
-machine code and runs on Intel 8080 and Zilog Z80 CPUs in the CP/M operating
-system with an ANSI terminal (for example DEC VT-220).
-
-Compiled with Aztec C Version 1.06d from Manx Software:
-
-	cc ue
-	as ue.asm
-	ln -o ue.com ue.o c.lib
-
-UE.COM size:	12k
-
 Operation:
 
 ue requires a file name. If a file name is not provided, ue will refuse to
 run. If it exists, the file is opened for editing, if not, the file is created
 by writing the newly entered text to disk.
 
-There is no status line. The search prompt is shown at the last line.
+There is no status line. The search prompt pre-empts the first line.
 
 Text buffer size, undo buffer size, horizontal width, vertical height and tab
 size are fixed. Change the source and compile to suit your needs.
 
-<Esc>, cursor up, cursor left, cursor right or cursor down aborts the search,
-^L proceeds with the search. 
+The search string input can be terminated by <Esc>, <Enter> or ^L. 
+
+<Esc> aborts the search function, <Enter> or ^L proceeds with the search. 
 
 'Search again' is a '^L^L' sequence away.
 
@@ -115,14 +101,6 @@ Unused control codes are inserted into the text buffer but not displayed.
 This is a limitation of the console not ue. Use ^U (undo) to remove them.
 
 Changes:
-
-1.26 Dec. 12, 2017
-Ported to CP/M , Intel 8080 and Zilog Z80.
-Written keyPressed function in Intel 8080 assembly for CP/M.
-Stripped out CP/M end-of-file (0x1A) characters.
-Made use of ANSI terminals' clear-to-end-of-line.
-Added backspace key for deleting character to the left.
-Increased BUF to 20KB.
 
 1.25 Sept. 6, 2002
 Initial release 'OOPS' fix.
