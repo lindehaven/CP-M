@@ -76,7 +76,10 @@ Internals ---------------------------------------------------------------------
 
 Changes -----------------------------------------------------------------------
 
-    1.27 Dec. 28, 2017. Lars Lindehaven
+    1.26.1 Jan. 2, 2018. Lars Lindehaven
+    *   Fixed column display during search.
+
+    1.26.0 Dec. 28, 2017. Lars Lindehaven
     *   Ported to CP/M , Intel 8080 and Zilog Z80.
     *   Written keyPressed function in Intel 8080 assembly for CP/M.
     *   Made use of ANSI terminals' clear-to-end-of-line.

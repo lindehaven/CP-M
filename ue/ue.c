@@ -304,7 +304,7 @@ void fend() {
 void search() {
     static char sstring[MAX_SSLEN+1] = "";
     static int slen = 0;
-    char ch, *foundp = editp;
+    char ch, *p, *foundp = editp;
     do {
         status(STAT_CLR|STAT_POS|STAT_LOOK, sstring);
         ch = keyPressed();
@@ -327,6 +327,8 @@ void search() {
                 lbeg();
                 display();
                 editp = foundp;
+                for (col = 0, p = prevline(editp); p < editp; p++)
+                    col += *p == '\t' ? tw - col % tw : 1;
             } else {
                 fbeg();
                 display();
