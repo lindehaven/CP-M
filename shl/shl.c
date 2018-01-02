@@ -75,14 +75,9 @@ struct shl_type {
     char* mlc_end;
 };
 
-char* shle_a[] = {".ASM", NULL};
-char* shlk_a[] = {
-    "add", "adi", "lxi", "mov",
-    NULL
-};
-
-char* shle_c[] = {".C", ".H", ".CPP", ".HPP", ".CC", NULL};
-char* shlk_c[] = {
+/* C/C++ keywords */
+char* shle_cpp[] = {".C", ".H", ".CPP", ".HPP", ".CC", NULL};
+char* shlk_cpp[] = {
     "switch", "if", "while", "for", "break", "continue", "return",
     "else", "struct", "union", "typedef", "static", "enum", "class",
     "case", "#include", "volatile", "register", "sizeof", "typedef",
@@ -92,9 +87,23 @@ char* shlk_c[] = {
     NULL
 };
 
+/* CP/M Plus commands*/
+char* shle_sub[] = {".SUB", NULL};
+char* shlk_sub[] = {
+    "COPYSYS", "DATE", "DEVICE", "DIR", "DIRS", "DUMP", "ED", "ERA", "ERASE",
+    "GENCOM", "GET", "HELP", "HEXCOM", "INITDIR", "LIB", "LINK", "MAC",
+    "PATCH", "PIP", "PUT", "REN", "RENAME", "RMAC", "SAVE", "SET", "SETDEF",
+    "SHOW", "SID", "SUBMIT", "TYPE", "USER", "XREF",
+    "copysys", "date", "device", "dir", "dirs", "dump", "ed", "era", "erase",
+    "gencom", "get", "help", "hexcom", "initdir", "lib", "link", "mac",
+    "patch", "pip", "put", "ren", "rename", "rmac", "save", "set", "setdef",
+    "show", "sid", "submit", "type", "user", "xref",
+    NULL
+};
+
 struct shl_type shl_data[] = {
-    { shle_a, shlk_a, ";",  "", ""},
-    { shle_c, shlk_c, "//", "/*", "*/"}
+    { shle_cpp, shlk_cpp, "//", "/*", "*/"},
+    { shle_sub, shlk_sub, ";",  "", ""}
 };
 
 #define SHL_LANGUAGES (sizeof(shl_data) / sizeof(shl_data[0]))
