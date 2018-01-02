@@ -43,7 +43,7 @@
 #define KEY_SEARCH   12     /* ^L       Search string incrementally (look)  */
 
 /* Editing ---------------------------------------------------------------- */
-#define KEY_TABW     21     /* ^U       Change tab width (1-8 spaces)       */
+#define KEY_TABW     21     /* ^U       Change tab width                    */
 #define KEY_TAB       9     /* ^I       Insert tab width spaces             */
 #define KEY_LINS     13     /* ^M       Insert new line                     */
 #define KEY_DEL       7     /* ^G       Delete character to the right       */
@@ -55,6 +55,6 @@
 #define KEY_LDN       2     /* ^B       Move line down                      */
 
 /* File commands ---------------------------------------------------------- */
-#define KEY_FSAVE    23     /* ^W       Write file (save)                   */
-#define KEY_FQUIT    17     /* ^Q       Quit (exit)                         */
+#define KEY_FSAVE    23     /* ^W       Write to file                       */
+#define KEY_FQUIT    17     /* ^Q       Quit                                */
 

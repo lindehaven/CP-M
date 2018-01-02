@@ -3,7 +3,7 @@
     Copyright (C) 2017 Lars Lindehaven
 
     Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
-    Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware
+    Copyright (C) 2015-2016 Miguel Garcia / FloppySoftware
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
@@ -41,7 +41,7 @@
 #define SY_COLS     (TERM_COLS)
 #define SY_COLM     0
 #define SY_COLF     1
-#define SY_COLI     (SY_COLS - 36)
+#define SY_COLI     (SY_COLS - 41)
 #define ED_ROW1     SY_ROWS
 #define ED_ROWS     (TERM_ROWS - ED_ROW1)
 #define ED_COLS     (TERM_COLS)
@@ -170,7 +170,7 @@ edLoop() {
             case KEY_FQUIT :
                 if (!eb_eds)
                     return;
-                else if (sysMsgConf("Discard changes (Y/N)? "))
+                else if (sysMsgConf("Quit without saving changes? "))
                     return;
                 else {
                     sysPutFileName();
@@ -759,8 +759,8 @@ search() {
                 edUpdate(0, eb_cur - es_row);
             }
         }
-    } while (ch!=0x1b && ch!=KEY_LINS && ch!=KEY_FSAVE && ch!=KEY_FQUIT &&
-             ch!=KEY_CLT && ch!=KEY_CRT && ch!=KEY_RUP && ch!=KEY_RDN);
+    } while (ch != 0x1b && ch != KEY_CLT && ch != KEY_CRT &&
+             ch != KEY_RUP && ch != KEY_RDN);
     sysPutFilename();
 }
 
@@ -819,11 +819,11 @@ sysPutSearchString(s, len) char *s; int len; {
 sysPutInfo(eds, tab, cur, tot, col, len) int eds, tab, cur, tot, col, len; {
     scrChrInverted();
     scrPosCur(SY_ROW1, SY_COLI);
-    printf("P%02d  ", pb_tot);
-    printf("E%05d  ", eds);
-    printf("T%d  ", tab);
-    printf("R%04d/%04d  ", cur + 1, tot);
-    printf("C%02d/%02d ", col + 1, len);
+    printf("P:%02d  ", pb_tot);
+    printf("E:%05d  ", eds);
+    printf("T:%d  ", tab);
+    printf("R:%04d/%04d  ", cur + 1, tot);
+    printf("C:%02d/%02d ", col + 1, len);
     scrChrNormal();
 }
 

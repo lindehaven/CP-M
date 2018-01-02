@@ -36,7 +36,7 @@
 
 #define PROG_NAME   "Binary Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.2 2017-12-11"
+#define PROG_VERS   "v0.1.3 2018-01-02"
 #define PROG_SYST   "CP/M"
 
 #define WORDBITS    16                              /* # of bits in a word  */
@@ -349,32 +349,38 @@ rowDown() {
 /* Move cursor one column left */
 colLeft() {
     if (bcurr > 0) {
+        bcurr--;
         if (ecol > 0) {
-            bcurr--;
             ecol--;
-            edPosCur();
-        } else if (bcurr >= ED_COLS) {
-            bcurr--;
+        } else {
             ecol = ED_COLS-1;
-            erow--;
-            edPosCur();
+            if (eatop >= ED_COLS && erow == 0) {
+                eatop -= ED_COLS;
+                edUpdAll();
+            } else if (erow > 0) {
+                erow--;
+            }
         }
+        edPosCur();
     }
 }
 
 /* Move cursor one column right */
 colRight() {
-    if (bcurr < bsize) {
+    if (bcurr < bsize-1) {
+        bcurr++;
         if (ecol < ED_COLS-1) {
-            bcurr++;
             ecol++;
-            edPosCur();
-        } else if (bcurr < bsize - ED_COLS) {
-            bcurr++;
+        } else {
             ecol = 0;
-            erow++;
-            edPosCur();
+            if (eatop <= bsize-ED_COLS && erow == ED_ROWS-1) {
+                eatop += ED_COLS;
+                edUpdAll();
+            } else if (erow < ED_ROWS-1) {
+                erow++;
+            }
         }
+        edPosCur();
     }
 }
 
