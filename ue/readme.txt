@@ -6,6 +6,9 @@ Summary -----------------------------------------------------------------------
     Micro Editor (ue) enables easy editing of small source code files. Source
     code files are limited in size to fit into the transient program area (TPA)
     of CP/M.
+    
+    NOTE! If ^S is pressed repeatedly then screen output may pause.
+          Press ^Q once to unpause.
 
 Screen Layout -----------------------------------------------------------------
 
@@ -67,7 +70,6 @@ File commands -----------------------------------------------------------------
 Internals ---------------------------------------------------------------------
 
     *   Digital Research CP/M systems
-    *   Wordstar key mapping
     *   ANSI terminal
     *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
         by Manx Software Systems

@@ -15,9 +15,12 @@ Summary -----------------------------------------------------------------------
     probably be too low in a real CP/M environment with a Zilog Z80 or
     Intel Intel 8080 CPU running at a few MHz.
 
+    NOTE! If ^S is pressed repeatedly then screen output may pause.
+          Press ^Q once to unpause.
+
 Screen Layout -----------------------------------------------------------------
 
-    The first row on top of the screen is called the status line.
+    The first row on top of the screen is called the status row.
     It displays:
 
     *   F   which file that is being edited
@@ -77,7 +80,6 @@ File commands -----------------------------------------------------------------
 Internals ---------------------------------------------------------------------
 
     *   Digital Research CP/M systems
-    *   Wordstar key mapping
     *   ANSI terminal
     *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
         by Manx Software Systems

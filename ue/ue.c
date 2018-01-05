@@ -71,13 +71,11 @@ typedef struct {
 typedef struct {
     char ch;
     char *pos;
-    int del;
 } U_REC;
 
 #define UNDO_SIZE   (2000*sizeof(U_REC))
 #define EDIT_SIZE   (32*1024-1)
 #define CLIP_SIZE   (256)
-#define FILE_MODE   0666
 #define MAX_SSLEN   40
 #define MAX_ROWS    (TERM_ROWS-1)
 #define MAX_COLS    (TERM_COLS)
@@ -177,13 +175,9 @@ void normvideo() {
 ; int keyPressed(void);
     public keyPressed
 keyPressed:
-    lhld 1
-    lxi d,6
-    dad d
-    lxi d,keyin2
-    push d
-    pchl
-keyin2:
+    lxi d,253
+    mvi c,6
+    call 5
     mvi h,0
     mov l,a
     ret
@@ -346,9 +340,8 @@ void del() {
     if (editp < endp) {
         if ((void*)undop < (void*)editbuf) {
             if (*editp == '\n') totln--;
-            undop->ch = *editp;
+            undop->ch = *editp | 0x80;
             undop->pos = editp;
-            undop->del = 1;
             undop++; edits++;
             editmove(editp+1, editp, endp-editp);
         } else {
@@ -398,9 +391,9 @@ void undo() {
     if ((void*)undop > (void*)undobuf) {
         undop--; edits--; 
         editp = undop->pos;
-        if (undop->del) {
+        if (undop->ch & 0x80) {
             editmove(editp, editp+1, endp-editp);
-            *editp = undop->ch;
+            *editp = undop->ch & 0x7f;
             if (*editp == '\n') totln++;
         } else {
             if (*editp == '\n') totln--;
@@ -542,9 +535,8 @@ int main(argc, argv) int argc; char **argv; {
                 editmove(editp, editp+1, endp-editp);
                 *editp = ch == '\r' ? '\n' : ch;
                 if (*editp++ == '\n') totln++;
-                undop->ch = editp[-1];
+                undop->ch = editp[-1] & 0x7f;
                 undop->pos = editp-1;
-                undop->del = 0;
                 undop++; edits++;
             } else {
                 status(STAT_CLR|STAT_ERR, "Buffer is full! Undo or save. ");

@@ -36,7 +36,7 @@
 
 #define PROG_NAME   "Binary Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.3 2018-01-02"
+#define PROG_VERS   "v0.1.4 2018-01-05"
 #define PROG_SYST   "CP/M"
 
 #define WORDBITS    16                              /* # of bits in a word  */
@@ -599,18 +599,13 @@ scrNorVideo() {
 
 #asm
 ; int keyPressed(void);
-;   Get character from the keyboard.
-        public      keyPressed
+    public keyPressed
 keyPressed:
-        lhld        1
-        lxi         d,6
-        dad         d
-        lxi         d,keyin2
-        push        d
-        pchl
-keyin2:
-        mvi         h,0
-        mov         l,a
-        ret
+    lxi d,253
+    mvi c,6
+    call 5
+    mvi h,0
+    mov l,a
+    ret
 #endasm
 

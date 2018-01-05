@@ -987,17 +987,12 @@ scrClrEol() {
 
 #asm
 ; int keyPressed(void);
-;   Get character from the keyboard.
-        public      keyPressed
+    public keyPressed
 keyPressed:
-        lhld        1
-        lxi         d,6
-        dad         d
-        lxi         d,keyin2
-        push        d
-        pchl
-keyin2:
-        mvi         h,0
-        mov         l,a
-        ret
+    lxi d,253
+    mvi c,6
+    call 5
+    mvi h,0
+    mov l,a
+    ret
 #endasm
