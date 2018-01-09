@@ -118,6 +118,9 @@ Internals ---------------------------------------------------------------------
 
 Changes -----------------------------------------------------------------------
 
+    1.26.2 Jan. 9, 2018. Lars Lindehaven
+    *   Added function to replace a search string.
+
     1.26.1 Jan. 2, 2018. Lars Lindehaven
     *   Fixed column display during search.
 
