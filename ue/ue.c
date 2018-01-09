@@ -1,7 +1,7 @@
 /*
     Micro Editor (ue)
 
-    Public Domain 2017 (C) by Lars Lindehaven.
+    Public Domain 2017-2018 (C) by Lars Lindehaven.
     Public Domain 2002 (C) by Terry Loveall.
     Public Domain 1991 by Anthony Howe.  All rights released.
 
@@ -48,7 +48,7 @@
 #define KEY_PDN     ('C' & 0X1F)    /* Cursor one page down */
 #define KEY_FBEG    ('T' & 0X1F)    /* Cursor to beginning of file */
 #define KEY_FEND    ('V' & 0X1F)    /* Cursor to end of file */
-#define KEY_SEARCH  ('L' & 0X1F)    /* Search string incrementally */
+#define KEY_SRCH    ('L' & 0X1F)    /* Search string incrementally */
 #define KEY_TABW    ('U' & 0X1F)    /* Change tab width */
 #define KEY_TAB     ('\t')          /* Insert tab */
 #define KEY_LINS    ('\r')          /* Insert new line */
@@ -59,6 +59,7 @@
 #define KEY_LPASTE  ('P' & 0X1F)    /* Paste line */
 #define KEY_LMVUP   ('Y' & 0X1F)    /* Move line up */
 #define KEY_LMVDN   ('B' & 0X1F)    /* Move line down */
+#define KEY_REPL    ('N' & 0X1F)    /* Replace string incrementally */
 #define KEY_UNDO    ('Z' & 0X1F)    /* Undo last character insert/delete */
 #define KEY_FSAVE   ('W' & 0X1F)    /* Write to file */
 #define KEY_FQUIT   ('Q' & 0X1F)    /* Quit */
@@ -76,14 +77,15 @@ typedef struct {
 #define UNDO_SIZE   (2000*sizeof(U_REC))
 #define EDIT_SIZE   (32*1024-1)
 #define CLIP_SIZE   (256)
-#define MAX_SSLEN   40
 #define MAX_ROWS    (TERM_ROWS-1)
 #define MAX_COLS    (TERM_COLS)
-#define STAT_COL    (TERM_COLS-31)
+#define MAX_SRLEN   (TERM_COLS-4)
+#define STAT_COL    (TERM_COLS-30)
 #define STAT_CLR    0x01
 #define STAT_POS    0x02
 #define STAT_FILE   0x04
-#define STAT_LOOK   0x08
+#define STAT_SRCH   0x08
+#define STAT_REPL   0x10
 #define STAT_ERR    0x80
 
 /* Do not change the order of these char buffers. */
@@ -114,8 +116,9 @@ void pup();
 void pdn();
 void fbeg();
 void fend();
-void search();
+void sarstr();
 void tabw();
+void ins();
 void del();
 void rub();
 void lcut();
@@ -133,9 +136,10 @@ char key[] = {
     KEY_RUP,    KEY_RDN,    KEY_CLT,    KEY_CRT,
     KEY_WLT,    KEY_WRT,    KEY_LBEG,   KEY_LEND,
     KEY_PUP,    KEY_PDN,    KEY_FBEG,   KEY_FEND,
-    KEY_SEARCH, KEY_TABW,   KEY_DEL,    KEY_RUB,
-    KEY_BS,     KEY_LCUT,   KEY_LPASTE, KEY_LMVUP,
-    KEY_LMVDN,  KEY_UNDO,   KEY_FSAVE,  KEY_FQUIT,
+    KEY_SRCH,   KEY_REPL,   KEY_TABW,   KEY_DEL,
+    KEY_RUB,    KEY_BS,     KEY_LCUT,   KEY_LPASTE,
+    KEY_LMVUP,  KEY_LMVDN,  KEY_UNDO,   KEY_FSAVE,
+    KEY_FQUIT,
     '\0'
 };
 
@@ -143,15 +147,12 @@ void (*func[])() = {
     rup,        rdn,        clt,        crt, 
     wlt,        wrt,        lbeg,       lend,
     pup,        pdn,        fbeg,       fend, 
-    search,     tabw,       del,        rub,
-    rub,        lcut,       lpaste,     lmvup,
-    lmvdn,      undo,       fsave,      fquit,
+    sarstr,     sarstr,     tabw,       del,
+    rub,        rub,        lcut,       lpaste,
+    lmvup,      lmvdn,      undo,       fsave,
+    fquit,
     nop
 };
-
-void setterm(set) int set; {
-    if (set) printf("\x1b[0m");
-}
 
 void gotoxy(x, y) int x; int y; {
     printf("\x1b[%d;%dH", y, x);
@@ -186,8 +187,8 @@ keyPressed:
 void put1(ch) int ch; {
     if (ch != 0x00 && ch != 0x1a && ch != '\r') {
         if (ch == '\n') { outxy.X = 0; outxy.Y++; putchar('\n'); }
-        else { outxy.X++; putchar(ch & 0x7f); }
-        if (outxy.X >= TERM_COLS-1) putchar('+');
+        else if (++outxy.X < TERM_COLS-1) putchar(ch & 0x7f);
+        if (outxy.X == TERM_COLS-1) putchar('+');
     }
 }
 
@@ -198,20 +199,19 @@ void emitch(ch) int ch; {
 
 char *prevline(p) char *p; {
     while (editbuf < --p && *p != '\n');
-    return (editbuf < p ? ++p : editbuf);
+    return editbuf < p ? ++p : editbuf;
 }
 
 char *nextline(p) char *p; {
     while (p < endp && *p++ != '\n');
-    return (p < endp ? p : endp);
+    return p < endp ? p : endp;
 }
 
 char *adjust(p, column) char *p; int column; {
     int j = 0;
-    while (p < endp && *p != '\n' && j < column) {
+    while (p < endp && *p != '\n' && j < column)
         j += *p++ == '\t' ? tw - j % tw : 1;
-    }
-    return (p);
+    return p;
 }
 
 int currline() {
@@ -224,7 +224,7 @@ int currline() {
 int linelen(p) char *p; {
     char *pp = prevline(p);
     char *np = nextline(p);
-    return (np - pp);
+    return np - pp;
 }
 
 void charmove(src, dest, cnt) char *src; char *dest; int cnt; {
@@ -295,27 +295,56 @@ void fend() {
     epage = editp = endp;
 }
 
-void search() {
-    static char sstring[MAX_SSLEN+1] = "";
-    static int slen = 0;
+int sarins(str, len, ch) char *str; int len; char ch; {
+    if (len < MAX_SRLEN) {
+        str[len] = ch == '\r' ? '\n' : ch;
+        str[++len] = 0;
+        if (ch > 0x1f) putchar(ch);
+        else putchar(' ');
+    }
+    return len;
+}
+
+int sardel(str, len) char *str; int len; {
+    if (len > 0) {
+        str[--len] = 0;
+        putchar('\b');
+        putchar(' ');
+    }
+    return len;
+}
+
+void sarstr() {
+    static char sstring[MAX_SRLEN+1] = "", rstring[MAX_SRLEN+1] = "";
+    static int slen = 0, rlen = 0;
+    int i, found = 0, replace = 0;
     char ch, *p, *foundp = editp;
     do {
-        status(STAT_CLR|STAT_POS|STAT_LOOK, sstring);
-        ch = keyPressed();
-        if (slen > 0 && (ch == KEY_RUB || ch == KEY_BS)) {
-            sstring[--slen] = 0;
-            emitch('\b'); emitch(' ');
-        } else if (slen < MAX_SSLEN && ch > 0x1f) {
-            sstring[slen] = ch;
-            sstring[++slen] = 0;
-            emitch(ch);
+        if (replace) status(STAT_CLR|STAT_POS|STAT_REPL, rstring);
+        else status(STAT_CLR|STAT_POS|STAT_SRCH, sstring);
+        ch = (char)keyPressed() & 0x7f;
+        if (ch == KEY_RUB || ch == KEY_BS) {
+            if (replace) rlen = sardel(rstring, rlen);
+            else slen = sardel(sstring, slen);
+        } else if (ch > 0x1f || ch == '\r' || ch == '\t') {
+            if (replace) rlen = sarins(rstring, rlen, ch);
+            else slen = sarins(sstring, slen, ch);
         }
         if (slen > 0) {
-            if (ch == KEY_SEARCH)
+            if (found && replace && ch == KEY_REPL) {
+                for (i = 0; i < slen; i++) del();
+                for (i = 0; i < rlen; i++) ins(rstring[i]);
                 crt();
+            } else if (!replace && ch == KEY_REPL) {
+                replace = 1;
+            } else if (ch == KEY_SRCH) {
+                replace = 0;
+                crt();
+            }
             while (editp < endp-1 && strncmp(editp, sstring, slen))
                 crt();
             if (editp < endp-1) {
+                found = 1;
                 foundp = page = editp;
                 epage = editp+1;
                 lbeg();
@@ -323,7 +352,12 @@ void search() {
                 editp = foundp;
                 for (col = 0, p = prevline(editp); p < editp; p++)
                     col += *p == '\t' ? tw - col % tw : 1;
+                gotoxy(col+1, row+1);
+                invvideo();
+                for (i = 0; i < slen; i++) emitch(sstring[i]);
+                normvideo();
             } else {
+                found = 0;
                 fbeg();
                 display();
             }
@@ -334,6 +368,21 @@ void search() {
 
 void tabw() {
     if (++tw > 8) tw = 2;
+}
+
+
+void ins(ch) char ch; {
+    if (endp < editbuf+EDIT_SIZE-1 && (void*)undop < (void*)editbuf) {
+        editmove(editp, editp+1, endp-editp);
+        *editp = ch == '\r' ? '\n' : ch;
+        if (*editp++ == '\n') totln++;
+        undop->ch = editp[-1] & 0x7f;
+        undop->pos = editp-1;
+        undop++; edits++;
+    } else {
+        status(STAT_CLR|STAT_ERR, "Buffer is full! Undo or save. ");
+        keyPressed();
+    }
 }
 
 void del() {
@@ -489,6 +538,20 @@ void display() {
     gotoxy(col+1, row+1);
 }
 
+void statstr(s) char *s; {
+    int i = 0;
+    while (*s && i < MAX_SRLEN) {
+        if (*s > 0x1f) {
+            putchar(*s); i += 1;
+        } else if (*s == '\t') {
+            putchar('\\'); putchar('t'); i += 2;
+        } else if (*s == '\n') {
+            putchar('\\'); putchar('n'); i += 2;
+        }
+        s++;
+    }
+}
+
 void status(mask, str) int mask; char *str; {
     int i;
     invvideo();
@@ -498,19 +561,20 @@ void status(mask, str) int mask; char *str; {
     }
     if (mask & STAT_POS) {
         i = currline();
-        gotoxy(TERM_COLS-31, TERM_ROWS); printf("E:%d", edits);
-        gotoxy(TERM_COLS-24, TERM_ROWS); printf("T:%d", tw);
-        gotoxy(TERM_COLS-20, TERM_ROWS); printf("C:%d", col+1);
-        gotoxy(TERM_COLS-14, TERM_ROWS); printf("R:%d/%d", i, totln);
-    }
+        gotoxy(STAT_COL, TERM_ROWS);
+        printf("E:%d T:%d C:%d R:%d/%d", edits, tw, col+1, i, totln);
+     }
     if (mask & STAT_FILE) {
-        gotoxy(2, TERM_ROWS); printf("F:%s", str);
+        gotoxy(2, TERM_ROWS); statstr("F:"); statstr(str);
     }
-    if (mask & STAT_LOOK) {
-        gotoxy(2, TERM_ROWS); printf("L:%s", str);
+    if (mask & STAT_SRCH) {
+        gotoxy(2, TERM_ROWS); statstr("S:"); statstr(str);
+    }
+    if (mask & STAT_REPL) {
+        gotoxy(2, TERM_ROWS); statstr("N:"); statstr(str);
     }
     if (mask & STAT_ERR) {
-        gotoxy(2, TERM_ROWS); printf("%s", str);
+        gotoxy(2, TERM_ROWS); statstr(str);
     }
     normvideo();
 }
@@ -519,32 +583,18 @@ int main(argc, argv) int argc; char **argv; {
     int i;
     char ch, *p;
     if (argc < 2)
-        return (2);
-    setterm(0);
+        return 2;
     filename = *++argv;
     fread();
     while (!done) {
         display();
         ch = (char)keyPressed() & 0x7f; 
-        i = 0; 
-        while (key[i] != ch && key[i] != '\0')
-            ++i;
+        for (i = 0; key[i] != ch && key[i] != '\0'; i++)
+            ;
         (*func[i])();
-        if (key[i] == '\0' && (ch > 0x1f || ch == '\r' || ch == '\t')) {
-            if (endp < editbuf+EDIT_SIZE-1 && (void*)undop < (void*)editbuf) {
-                editmove(editp, editp+1, endp-editp);
-                *editp = ch == '\r' ? '\n' : ch;
-                if (*editp++ == '\n') totln++;
-                undop->ch = editp[-1] & 0x7f;
-                undop->pos = editp-1;
-                undop++; edits++;
-            } else {
-                status(STAT_CLR|STAT_ERR, "Buffer is full! Undo or save. ");
-                keyPressed();
-            }
-        }
+        if (key[i] == '\0' && (ch > 0x1f || ch == '\r' || ch == '\t'))
+            ins(ch);
     }
     gotoxy(1, TERM_ROWS+1);
-    setterm(1);
-    return (0);
+    return 0;
 }
