@@ -74,19 +74,17 @@ typedef struct {
     char *pos;
 } U_REC;
 
-#define UNDO_SIZE   (2000*sizeof(U_REC))
+#define UNDO_SIZE   (3000*sizeof(U_REC))
 #define EDIT_SIZE   (32*1024-1)
 #define CLIP_SIZE   (256)
 #define MAX_ROWS    (TERM_ROWS-1)
 #define MAX_COLS    (TERM_COLS)
 #define MAX_SRLEN   (TERM_COLS-4)
 #define STAT_COL    (TERM_COLS-30)
-#define STAT_CLR    0x01
-#define STAT_POS    0x02
-#define STAT_FILE   0x04
-#define STAT_SRCH   0x08
-#define STAT_REPL   0x10
-#define STAT_ERR    0x80
+#define STAT_FILE   'F'
+#define STAT_SRCH   'L'
+#define STAT_REPL   'N'
+#define STAT_ERR    '!'
 
 /* Do not change the order of these char buffers. */
 char undobuf[UNDO_SIZE];
@@ -299,18 +297,12 @@ int sarins(str, len, ch) char *str; int len; char ch; {
     if (len < MAX_SRLEN) {
         str[len] = ch == '\r' ? '\n' : ch;
         str[++len] = 0;
-        if (ch > 0x1f) putchar(ch);
-        else putchar(' ');
     }
     return len;
 }
 
 int sardel(str, len) char *str; int len; {
-    if (len > 0) {
-        str[--len] = 0;
-        putchar('\b');
-        putchar(' ');
-    }
+    if (len > 0) str[--len] = 0;
     return len;
 }
 
@@ -320,8 +312,8 @@ void sarstr() {
     int i, found = 0, replace = 0;
     char ch, *p, *foundp = editp;
     do {
-        if (replace) status(STAT_CLR|STAT_POS|STAT_REPL, rstring);
-        else status(STAT_CLR|STAT_POS|STAT_SRCH, sstring);
+        if (replace) status(STAT_REPL, rstring);
+        else status(STAT_SRCH, sstring);
         ch = (char)keyPressed() & 0x7f;
         if (ch == KEY_RUB || ch == KEY_BS) {
             if (replace) rlen = sardel(rstring, rlen);
@@ -372,15 +364,20 @@ void tabw() {
 
 
 void ins(ch) char ch; {
-    if (endp < editbuf+EDIT_SIZE-1 && (void*)undop < (void*)editbuf) {
-        editmove(editp, editp+1, endp-editp);
-        *editp = ch == '\r' ? '\n' : ch;
-        if (*editp++ == '\n') totln++;
-        undop->ch = editp[-1] & 0x7f;
-        undop->pos = editp-1;
-        undop++; edits++;
+    if (endp < editbuf+EDIT_SIZE-1) {
+        if ((void*)undop < (void*)editbuf) {
+            editmove(editp, editp+1, endp-editp);
+            *editp = ch == '\r' ? '\n' : ch;
+            if (*editp++ == '\n') totln++;
+            undop->ch = editp[-1] & 0x7f;
+            undop->pos = editp-1;
+            undop++; edits++;
+        } else {
+            status(STAT_ERR, "Undo buffer is full. ");
+            keyPressed();
+        }
     } else {
-        status(STAT_CLR|STAT_ERR, "Buffer is full! Undo or save. ");
+        status(STAT_ERR, "Edit buffer is full. ");
         keyPressed();
     }
 }
@@ -394,9 +391,12 @@ void del() {
             undop++; edits++;
             editmove(editp+1, editp, endp-editp);
         } else {
-            status(STAT_CLR|STAT_ERR,"Buffer is full! Undo or save. ");
+            status(STAT_ERR, "Undo buffer is full. ");
             keyPressed();
         }
+    } else {
+        status(STAT_ERR, "Edit buffer is empty. ");
+        keyPressed();
     }
 }
 
@@ -412,6 +412,7 @@ void lcut() {
         charmove(editp, clipp, cliplen);
         editmove(editp+cliplen, editp, endp-editp);
         edits++;
+        totln--;
     }
 }
 
@@ -421,19 +422,24 @@ void lpaste() {
         editmove(editp, editp+cliplen, endp-editp);
         charmove(clipp, editp, cliplen);
         cliplen = 0;
+        totln++;
     }
 }
 
 void lmvup() {
-    lcut();
-    rup();
-    lpaste();
+    if (currline() > 1) {
+        lcut();
+        rup();
+        lpaste();
+    }
 }
 
 void lmvdn() {
-    lcut();
-    rdn();
-    lpaste();
+    if (currline() < totln) {
+        lcut();
+        rdn();
+        lpaste();
+    }
 }
 
 void undo() {
@@ -465,11 +471,11 @@ void fread() {
         }
         fclose(fp);
     } else {
-        fprintf(stderr, "Cannot read %s!", filename);
+        fprintf(stderr, "%s cannot be read", filename);
         done = 1;
     }
     if (endp >= editbuf+EDIT_SIZE) {
-        fprintf(stderr, "File %s is too large!", filename);
+        fprintf(stderr, "%s is too large", filename);
         done = 1;
     }
 }
@@ -485,7 +491,7 @@ void fsave() {
         }
         fclose(fp);
     } else {
-        status(STAT_CLR|STAT_ERR, "Cannot write to file! ");
+        status(STAT_ERR, "Cannot write to file. ");
         keyPressed();
     }
     undop = &undobuf; edits = 0;
@@ -493,7 +499,7 @@ void fsave() {
 
 void fquit() {
     if (edits) {
-        status(STAT_CLR|STAT_ERR, "Quit without saving changes? ");
+        status(STAT_ERR, "Quit without saving changes? ");
         if (toupper(keyPressed()) == 'Y') done = 1;
     } else
         done = 1;
@@ -534,7 +540,7 @@ void display() {
         clrtoeol();
         gotoxy(1, i);
     }
-    status(STAT_CLR|STAT_POS|STAT_FILE, filename);
+    status(STAT_FILE, filename);
     gotoxy(col+1, row+1);
 }
 
@@ -552,30 +558,16 @@ void statstr(s) char *s; {
     }
 }
 
-void status(mask, str) int mask; char *str; {
+void status(stat, str) char stat; char *str; {
     int i;
     invvideo();
-    if (mask & STAT_CLR) {
-        gotoxy(1, TERM_ROWS); clrtoeol();
-        for (i = 0; i < TERM_COLS; i++) putchar(' ');
-    }
-    if (mask & STAT_POS) {
-        i = currline();
-        gotoxy(STAT_COL, TERM_ROWS);
-        printf("E:%d T:%d C:%d R:%d/%d", edits, tw, col+1, i, totln);
-     }
-    if (mask & STAT_FILE) {
-        gotoxy(2, TERM_ROWS); statstr("F:"); statstr(str);
-    }
-    if (mask & STAT_SRCH) {
-        gotoxy(2, TERM_ROWS); statstr("S:"); statstr(str);
-    }
-    if (mask & STAT_REPL) {
-        gotoxy(2, TERM_ROWS); statstr("N:"); statstr(str);
-    }
-    if (mask & STAT_ERR) {
-        gotoxy(2, TERM_ROWS); statstr(str);
-    }
+    gotoxy(1, TERM_ROWS); clrtoeol();
+    for (i = 0; i < TERM_COLS; i++) putchar(' ');
+    gotoxy(STAT_COL, TERM_ROWS);
+    printf("E:%04d T:%1d C:%03d R:%05d/%05d",
+           edits < 10000 ? edits : 9999, tw, col+1, currline(), totln);
+    gotoxy(2, TERM_ROWS);
+    putchar(stat); putchar(':'); statstr(str);
     normvideo();
 }
 

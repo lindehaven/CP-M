@@ -17,11 +17,12 @@ From Wikipedia:
 
 I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C and
 assembly. My source code is unfortunately gone with the disks that I stored
-it on and with the computers I ran it on; a Spectravideo SV-328, Jet 80 and 
-Bondwell BW-2. By 1995 I thought that I would not use CP/M again. UNIX and M$ Windows had taken over.
+it on and with the computers I ran it on; a Spectravideo SV-328, a Jet 80 and 
+a Bondwell BW-2. By 1995 I thought that I would not use CP/M again. UNIX and M$
+Windows had taken over.
 
 But when I found and tried out some CP/M emulators I got the urge to write
-some of that good old code again - from scratch.
+some of that good old code again.
 
 I started with the Binary Editor because I had real good use of that kind of
 editor and it should be a given tool in any programmers toolbox. Could not
@@ -31,7 +32,7 @@ used it a few times when inspecting files saved by other programs.
 
 Continued with an attempt to port the Kilo editor [1] to CP/M because I wanted
 a source code editor with syntax highlighting. But I soon discovered that the
-Kilo editor was using too much of the 62KB TPA so I decided to write an editor
+Kilo editor was using too much of the 62 KB TPA so I decided to write an editor
 that uses less memory. Based most of my design and code on the Text editor [2]
 that works well in CP/M. I took away functions that I don't need (new file, open
 file, save file as) and added some that I do need (incremental search, move line
@@ -43,16 +44,16 @@ want to have as much free memory in TPA as possible if the Syntax Highlighter
 is to be linked with a text editor.
 
 While developing the Lean Editor and Syntax Highlighter I found the micro
-editor [3] written for *nix. It is small. I ported ue to CP/M to test it.
-Added the undo functionality and then some. Works ok.
+editor [3] written for *nix. It is small and lean. I ported it to CP/M, added
+undo, added replace, and more. Working fine.
 
-References:
+## References
 
-  [1] Kilo editor (kilo) by Salvatore Sanfilippo (antirez), https://github.com/antirez/kilo
+  [1] Kilo editor (kilo) by Salvatore Sanfilippo ([antirez|https://github.com/antirez/kilo])
   
-  [2] Text editor (te) by Miguel I. García López (MiguelVis), https://github.com/MiguelVis
+  [2] Text editor (te) by Miguel I. García López ([MiguelVis|https://github.com/MiguelVis])
 
-  [3] Micro Editor (ue) by Anthony Howe and Terry Loveall,       http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz
+  [3] [Micro Editor (ue)|http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz] by Anthony Howe and Terry Loveall
 
 
 ## Binary Editor (BE)
@@ -82,9 +83,11 @@ the `BE.COM` that you want. The help text for key mappings are located
 at `0x0030 - 0x00ff` and you should edit those too while you are at it.
 Save a backup of the original `BE.COM` before you start editing.
 
+See `be/readme.txt` file for details.
+
 ### Internals 
 
-Copyright (c) 2017 Lars Lindehaven.
+Copyright (c) 2017-2018 Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
@@ -123,7 +126,7 @@ See `le/readme.txt` file for details.
 
 ### Internals
 
-Copyright (c) 2017 Lars Lindehaven.
+Copyright (c) 2017-2018 Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
@@ -143,7 +146,7 @@ Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
 Parses and prints a byte buffer with highlighting of syntax for the
 selected language.
 
-The language is selected by calling shl_select_language() with the name
+The language is selected by calling `shl_select_language()` with the name
 of a file as argument, see `shl/shl.h` for details.
 Ex: `shl_select_language("EXAMPLE.C")` selects the C language.
 
@@ -167,7 +170,7 @@ for example Lean Editor.
 
 ### Internals
 
-Copyright (C) 2017 Lars Lindehaven
+Copyright (C) 2017-2018 Lars Lindehaven
 
 Work based on the Program Kilo editor, v0.1.1.
 Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
@@ -180,7 +183,7 @@ See `ue/readme.txt` file.
 
 ### Internals 
 
-Public Domain 2017 (C) by Lars Lindehaven.
+Public Domain 2017-2018 (C) by Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal

@@ -6,9 +6,12 @@ Summary -----------------------------------------------------------------------
     Micro Editor (UE) enables easy editing of small source code files. Source
     code files are limited in size to fit into the transient program area (TPA)
     of CP/M.
-    
-    NOTE! If ^S is pressed repeatedly then screen output may pause.
-          Press ^Q once to unpause.
+
+    When UE reads a file it discards all control characters except TAB (0x09)
+    and LF (0x0a). When UE saves a file it adds a CR (0x0d) to each LF so that
+    end of line is according to CP/M standard. Lines can be of arbitrary length
+    but should, for the sake of reading and editing source code, be shortened
+    to fit inside terminal screen borders.
 
     A string can be searched incrementally by pressing ^L (Search string
     incrementally) and then typing the string to search for. If the search
@@ -33,11 +36,14 @@ Summary -----------------------------------------------------------------------
     buffer becomes full it needs to be emptied by pressing ^Z (Undo last 
     insert/delete) or ^W (Write to file).
 
+    NOTE! If ^S is pressed repeatedly then screen output may pause.
+          Press ^Q once to unpause.
+
 Screen Layout -----------------------------------------------------------------
 
     In case lines are too long to be displayed in full then the rightmost
     column is marked with a '+' to indicate that there are more characters
-    beyond the right screen border. To get rid of them, shorten the lines.
+    beyond the right screen border.
 
     The last row on the bottom of the screen is called the status row.
     It displays:
@@ -50,25 +56,25 @@ Screen Layout -----------------------------------------------------------------
 
     Example:
 
-        F:UE.C                                E:56   T:4 C:9   R:94/463
+        F:UE.C                           E:0056 T:4 C:009 R:00094/00463
 
     If an incremental string search is active then it is shown instead of the
     file name:
 
-    *   S   search string
+    *   L   search string to look for
 
     Example:
 
-        S:for (i =                            E:119  T:4 C:21  R:382/463
+        L:for (i =                       E:0119 T:4 C:021 R:00382/00463
 
     If an incremental string replacements is active then it is shown instead
     of the file name:
 
-    *   N   new string
+    *   N   new string to replace search string
 
     Example:
 
-        N:for (index =                        E:119  T:4 C:21  R:382/463
+        N:for (index =                   E:0119 T:4 C:021 R:00382/00463
 
 Navigation --------------------------------------------------------------------
 
@@ -85,7 +91,8 @@ Navigation --------------------------------------------------------------------
     ^T      Cursor to beginning of file.
     ^V      Cursor to end of file.
     ^L      Search string incrementally. Looks for search string in the edit
-            buffer. Wraps when reached end of edit buffer.
+            buffer and marks it with inverse video. Wraps when reached the end
+            of the edit buffer.
 
 Editing -----------------------------------------------------------------------
 
@@ -116,7 +123,21 @@ Internals ---------------------------------------------------------------------
     *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
         and Andreas Gerlich.
 
+    UE is small - less than 1000 lines of code and around 15 KB binary.
+
+    UE is easy to adapt to your needs as a programmer - just edit and rebuild.
+    *   Keyboard mapping is very much a personal preference and is therefore
+        made easy to change.
+    *   If you for some reason does not have an ANSI terminal then it should
+        not be too difficult to adapt the source code to handle your terminal.
+    *   The sizes of the edit, undo and paste buffers are limited to fit inside
+        a Transient Program Area (TPA) of size 62 KB. Adjust with care as the
+        program will not run if too much memory is statically allocated.
+
 Changes -----------------------------------------------------------------------
+
+    1.26.3 Jan. 10, 2018. Lars Lindehaven
+    *   Reduced code redundancy and memory needs.
 
     1.26.2 Jan. 9, 2018. Lars Lindehaven
     *   Added function to replace a search string.
