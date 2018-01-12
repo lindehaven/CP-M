@@ -1,6 +1,6 @@
 /*
  *  Syntax Highlighter -- prints highlighted source code
- *  Copyright (C) 2017 Lars Lindehaven
+ *  Copyright (C) 2017-2018 Lars Lindehaven
  *
  *  Work based on the Program Kilo editor, v0.1.1.
  *  Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>

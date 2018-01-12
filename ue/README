@@ -1,116 +1,254 @@
 
-					ue -- micro editor
+Micro Editor (ue)
 
- ue is a basic functional terminal screen editor written in C. It uses no
- libraries except clib. Cursor control is provided by the *nix console. The
- following functions and associated control keys are provided:
 
-	^E	cursor up
-	^S	cursor left
-	^D	cursor right
-	^X	cursor down
-	^A	word left
-	^F	word right
-	^[	start of line
-	^]	end of line
-	^R	page up
-	^C	page down
-	^T	top of file
-	^B	bottom of file
-	^G	delete cursor char
-	^H	delete previous char
-	^Y	delete rest of line
-	^U	undo
-	^W	write file to disk
-	^L	look (search)
-	^Q	quit
-	^I	insert <TAB> char
-Plus the ever popular insert ASCII chars.
+Summary -----------------------------------------------------------------------
 
-All of this in a smaller binary than the original.
+    Micro Editor (UE) enables easy editing of small source code files. Source
+    code files are limited in size to fit into the transient program area (TPA)
+    of CP/M.
 
-The original was released into the Public Domain, so is this. Do with it what
-you will.
+    NOTE! If ^S is pressed repeatedly then screen output may pause. 
+          Press ^Q once to unpause.
 
-Thanks to Mike McQuade for help optimizing and debugging this package.
 
-September 5, 2002. Terry Loveall
+Command Line Options ----------------------------------------------------------
 
-Please send fixes, comments and flames to: <loveall@qwest.net>
+    UE can be started with a number of optional attribute values.
 
-Installing:
+        UE.COM [filename [tabwidth [autoindent [rows [columns]]]]]
 
-ue comes as source only. Compile with:
+    Default values for optional attributes are:
+    
+        *   filename    = $$$$$$$$.$$$
+        *   tabwidth    = 8
+        *   autoindent  = 1 (on)
+        *   rows        = 25
+        *   columns     = 80
 
-	gcc ue.c -O2 -fomit-frame-pointer -o ue ; strip ue ; ls -al ue 
+    Example: Filename = UE.C, tabwidth = 4, autoindent = 0 (off).
+    
+        UE.COM UE.C 4 0
 
-Copy the binary to a file on the search path, e.g.
+    Example: Filename = NARROW.ASM, tabwidth = 2, autoindent = 1 (on),
+             rows = 25, columns = 40.
+             
+        UE.COM NARROW.ASM 2 1 25 40
 
-	/usr/local/bin or /usr/bin
 
-For the smallest usable binary, get sstrip from Muppet labs in:
-http://www.muppetlabs.com/~breadbox/pub/software/ELFkickers-2.0a.tar.gz
-build and use instead of strip. sstrip will remove an additional 1.5k.
+Files -------------------------------------------------------------------------
 
-ue size without strip:	18k
-ue size with strip:		6.3k
-ue size with sstrip:	4.6k
+    When UE reads a file it discards all control characters except TAB (0x09)
+    and LF (0x0a). When UE saves a file it adds a CR (0x0d) to each LF so that
+    end of line is according to CP/M standard. Lines can be of arbitrary length
+    but should, for the sake of reading and editing source code, be shortened
+    to fit inside terminal screen borders.
 
-Operation:
 
-ue requires a file name. If a file name is not provided, ue will refuse to
-run. If it exists, the file is opened for editing, if not, the file is created
-by writing the newly entered text to disk.
+Undo --------------------------------------------------------------------------
 
-There is no status line. The search prompt pre-empts the first line.
+    All changes are placed in the undo buffer and can be reverted by pressing
+    ^Z (Undo last insert/delete). In case the undo buffer becomes full it needs
+    to be emptied by pressing ^Z (Undo last insert) or ^W (Write to file).
 
-Text buffer size, undo buffer size, horizontal width, vertical height and tab
-size are fixed. Change the source and compile to suit your needs.
 
-The search string input can be terminated by <Esc>, <Enter> or ^L. 
+Search & Replace --------------------------------------------------------------
 
-<Esc> aborts the search function, <Enter> or ^L proceeds with the search. 
+    A string can be searched incrementally by pressing ^L (Search string
+    incrementally) and then typing the string to search for. If the search
+    string is found then the cursor will move to the string in the edit buffer
+    and display it in inverse video. If the search string is not found then the
+    cursor will move to the beginning of the file. Pressing ^L again will
+    search for the next occurrence of the search string.
 
-'Search again' is a '^L^L' sequence away.
+    A string can be replaced by pressing ^N (Replace string) and then typing
+    the new string. If the search string has been found then it will be
+    possible to replace it with the new string. Pressing ^N again will replace
+    the search string with the new string and search for the next occurrence of
+    the search string. Pressing ^L again will search for the next occurrence of
+    the search string without replacing it.
 
-The search string is retained and redisplayed. Use ^H to erase prior
-characters in the search string. Undo is not implemented for input to the
-search string.
+    Pressing ^[ (Escape), ^E (Cursor one row up), ^X (Cursor one row down),
+    ^S (Cursor one column left) or ^D (Cursor one column right) exits the
+    search/replace mode and returns to edit mode.
 
-This editor started life as Anthony Howe's 'ant', the 1991 Obfuscated C Code
-winner. Thanks, Anthony, really elegant logic. 
 
-Since then, the curses library was replaced with STDIN/STDOUT. it was
-converted from a 'vi' style editor to a screen editor, undo, string search,
-backspace delete, 'delete-rest-of-line' and general code size optimization
-were added. 
+Screen layout -----------------------------------------------------------------
 
-The original split text buffer model was converted to a standard
-'insert/delete at point of cursor'. 
+    In case lines are too long to be displayed in full then the rightmost
+    column is marked with a '+' to indicate that there are more characters
+    beyond the right screen border.
 
-Limitations:
+    The last row on the bottom of the screen is called the status row.
+    It displays:
+    
+        *   Filename: filename
+        *   U: undo buffer usage
+        *   T: tabwidth
+        *   C: current column
+        *   R: current row / last row
 
-Can't change file name from within ue.
+    Example:
+    
+        Filename: $$$$$$$$.$$$                 U:000% T:8 C:009 R:00094/00463
 
-No redo, but the structure is there.
+    If an incremental string search is active then it is shown instead of the
+    filename:
+    
+        *   Search for: <search string to look for>
 
-No marked blocks and associated copy, cut and paste. Use gpm from the text
-console or use xterm/rxvt to copy/paste from/to ue.
+    Example:
+    
+        Search for: while (*p++                U:009% T:4 C:021 R:00382/00463
 
-Unused control codes are inserted into the text buffer but not displayed.
-This is a limitation of the console not ue. Use ^U (undo) to remove them.
+    If an incremental string replacements is active then it is shown instead
+    of the file name:
+    
+        *   Replace with: <new string to replace search string>
 
-Changes:
+    Example:
+    
+        Replace with: while (*ptr++            U:009% T:4 C:021 R:00382/00463
 
-1.25 Sept. 6, 2002
-Initial release 'OOPS' fix.
-Added 'Limitations' and 'Changes' sections, this file.
-Corrected 'compile with' command line, this file.
-Improved 'compile with' command line for size in ue.c and this file.
-Picked up a size optimization in function look().
-Fixed getch() to ignore PC function keys and to properly accept 'paste' text
- from gpm or X terminal.
-Changed array 'key[]' from type short to char for reduced size.
 
-1.24 Sept. 5, 2002
-Initial release.
+Navigation Keys ---------------------------------------------------------------
+
+    ^E      Cursor one row up.
+    ^X      Cursor one row down.
+    ^S      Cursor one column left.
+    ^D      Cursor one column right.
+    ^A      Cursor one word left.
+    ^F      Cursor one word right.
+    ^J      Cursor to beginning of line.
+    ^K      Cursor to end of line.
+    ^R      Cursor one page up.
+    ^C      Cursor one page down.
+    ^T      Cursor to beginning of file.
+    ^V      Cursor to end of file.
+    ^L      Search string incrementally. Looks for search string in the edit
+            buffer and marks it with inverse video. Wraps when reached the end
+            of the edit buffer.
+
+
+Editing Keys ------------------------------------------------------------------
+
+    ^N      Replace string. Replaces a search string with a new string.
+    ^U      Change tabwidth. Can be 2-8 spaces.
+    ^I      Insert tab (Tab).
+    ^M      Insert new line (Enter).
+    ^G      Delete character to the right (Delete).
+    ^H      Delete character to the left (Backspace).
+    ^Z      Undo last insert/delete.
+    ^O      Cut to end of line. Moves text to paste buffer.
+    ^P      Paste. Inserts all text from paste buffer.
+    ^Y      Move line up.
+    ^B      Move line down.
+
+
+File Command Keys -------------------------------------------------------------
+
+    ^W      Write to file. Saves the edit buffer to file with a carriage return
+            '\r' and a new line '\n' as end of line. Empties the undo and paste
+            buffers.
+    ^Q      Quit. Exits the program if no changes have been made or the user
+            does not want to save changes.
+
+
+Internals ---------------------------------------------------------------------
+
+    *   Digital Research CP/M systems
+    *   ANSI terminal
+    *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
+        by Manx Software Systems
+    *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+        and Andreas Gerlich.
+
+    UE is small - less than 1000 lines of code and around 15 KB binary.
+
+    UE is easy to adapt to your needs as a programmer - just edit and rebuild.
+    *   Keyboard mapping is very much a personal preference and is therefore
+        made easy to change.
+    *   If you for some reason does not have an ANSI terminal then it should
+        not be too difficult to adapt the source code to handle your terminal.
+    *   The sizes of the edit, undo and paste buffers are limited to fit inside
+        a Transient Program Area (TPA) of size 62 KB. Adjust with care as the
+        program will not run if too much memory is statically allocated.
+
+
+Change History ----------------------------------------------------------------
+
+    1.26.4 Jan. 12, 2018. Lars Lindehaven
+    *   Added function to autoindent lines.
+    *   Improved function for cutting/pasting text so that more text can be
+        cut/pasted and is also put in the undo buffer.
+    *   Improved function for moving lines up/down so that they are also put
+        in the undo buffer.
+    *   Added command line options to change filename, tabwidth, autoindent,
+        rows and columns.
+
+    1.26.3 Jan. 10, 2018. Lars Lindehaven
+    *   Reduced code redundancy and memory needs.
+
+    1.26.2 Jan. 9, 2018. Lars Lindehaven
+    *   Added function to replace a search string.
+
+    1.26.1 Jan. 2, 2018. Lars Lindehaven
+    *   Fixed column display during search.
+
+    1.26.0 Dec. 28, 2017. Lars Lindehaven
+    *   Ported to CP/M , Intel 8080 and Zilog Z80.
+    *   Written keyPressed function in Intel 8080 assembly for CP/M.
+    *   Made use of ANSI terminals' clear-to-end-of-line.
+    *   Changed the search function.
+    *   Lines longer than the screen width are visualized with '+'.
+    *   Added the undo function.
+    *   Added function to move a line up/down.
+    *   Added function to cut/paste a line.
+    *   Added status row at the bottom of the screen.
+
+    1.25 Sept. 6, 2002. Terry Loveall
+    *   Initial release 'OOPS' fix.
+    *   Added 'Limitations' and 'Changes' sections, this file.
+    *   Corrected 'compile with' command line, this file.
+    *   Improved 'compile with' command line for size in ue.c and this
+        file.
+    *   Picked up a size optimization in function look().
+    *   Fixed getch() to ignore PC function keys and to properly accept
+        'paste' text from gpm or X terminal.
+    *   Changed array 'key[]' from type short to char for reduced size.
+
+    1.24 Sept. 5, 2002. Terry Loveall
+    *   Initial release.
+
+    1991. Anthony Howe.
+    *   Initial release.
+
+
+License -----------------------------------------------------------------------
+
+    Public Domain 2017-2018 (C) by Lars Lindehaven.
+    Public Domain 2002 (C) by Terry Loveall.
+    Public Domain 1991 by Anthony Howe.  All rights released.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+      * Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+      * Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

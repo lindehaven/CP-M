@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 by Lars Lindehaven
+/* Copyright (C) 2017-2018 by Lars Lindehaven
  *  Finds the first occurrence of the substring needle in the string haystack.
  *  The terminating '\0' characters are not compared.
  *  Returns a pointer to the first occurrence in haystack of any of the entire

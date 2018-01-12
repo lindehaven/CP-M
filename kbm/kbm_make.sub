@@ -1,0 +1,4 @@
+; Build Keyboard Mapping using AZTEC
+cz kbm
+as kbm.asm
+ln -o kbm.com kbm.o c.lib

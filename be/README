@@ -1,6 +1,7 @@
 
 Binary Editor -- a small binary editor for programmers
 
+
 Summary ---------------------------------------------------------------
 
     Binary Editor (BE) enables hexadecimal and ASCII editing of binary
@@ -21,7 +22,8 @@ Summary ---------------------------------------------------------------
     NOTE! If ^S is pressed repeatedly then screen output may pause.
           Press ^Q once to unpause.
 
-Navigation ------------------------------------------------------------
+
+Navigation Keys ---------------------------------------------------------------
 
     ^E      Cursor one row up
     ^X      Cursor one row down
@@ -32,18 +34,21 @@ Navigation ------------------------------------------------------------
     ^T      Cursor to beginning of byte buffer (top)
     ^V      Cursor to end of byte buffer (bottom)
 
-Editing ---------------------------------------------------------------
+
+Editing Keys ------------------------------------------------------------------
 
     ^A      Set edit mode HEX
     ^F      Set edit mode ASCII
     ^Z      Toggle edit mode (ASCII/HEX)
 
-File commands ---------------------------------------------------------
+
+File Command Keys -------------------------------------------------------------
 
     ^W      Write buffer to file (save)
     ^Q      Quit
 
-Internals -------------------------------------------------------------
+
+Internals ---------------------------------------------------------------------
 
     *   Digital Research CP/M systems
     *   ANSI terminal
@@ -60,10 +65,10 @@ Internals -------------------------------------------------------------
     0x0030 - 0x00ff and you should edit those too while you are at it.
     Save a backup of the original BE.COM before you start editing.
 
-License ---------------------------------------------------------------
 
-    Copyright (C) 2017-2018 Lars Lindehaven
-    All rights reserved.
+License -----------------------------------------------------------------------
+
+    Copyright (C) 2017-2018 Lars Lindehaven. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are

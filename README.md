@@ -83,7 +83,7 @@ the `BE.COM` that you want. The help text for key mappings are located
 at `0x0030 - 0x00ff` and you should edit those too while you are at it.
 Save a backup of the original `BE.COM` before you start editing.
 
-See `be/readme.txt` file for details.
+See `be/README` file for details.
 
 ### Internals 
 
@@ -122,7 +122,7 @@ running on an Intel i5 at 2.6 GHz. However, the performance will
 probably be too low in a real CP/M environment with a Zilog Z80 or
 Intel Intel 8080 CPU running at a few MHz. Just saying.
 
-See `le/readme.txt` file for details.
+See `le/README` file for details.
 
 ### Internals
 
@@ -179,7 +179,7 @@ Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
 
 ### Summary 
 
-See `ue/readme.txt` file.
+See `ue/README` file.
 
 ### Internals 
 
@@ -196,4 +196,4 @@ Work based on the Micro editor, v1.25 by Terry Loveall.
 Public Domain 2002 (C) by Terry Loveall.
 Public Domain 1991 by Anthony Howe.  All rights released.
 
-Also see `ue/readme.txt` and `ue/README` files.
+Also see `ue/README` and `ue/README.OLD` files.

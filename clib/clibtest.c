@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 by Lars Lindehaven
+/* Copyright (C) 2017-2018 by Lars Lindehaven
  *  Test of modules for Aztec C.
  */
 #include "stdio.h"
@@ -17,7 +17,7 @@ int main(argc, argv) int argc; char* argv[];
     char *nail = "nail";
     char *res = NULL;
 
-    printf("Copyright (C) 2017 by Lars Lindehaven.");
+    printf("Copyright (C) 2017-2018 by Lars Lindehaven.");
     printf("\n Test of modules for Aztec C.");
 
     printf("\n  Testcase %2d: ", ++tcno);
