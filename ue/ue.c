@@ -585,12 +585,13 @@ void statstr(s) char *s; {
 void status(stat, str) char *stat, *str; {
     long int u = 100*eds/(MAX_UNDO+MAX_UNDO/99)+1;
     int i;
+    if (!eds) u = 0;
     invvideo();
     gotoxy(1, rows); clrtoeol();
     for (i = 0; i < cols; i++) putchar(' ');
     gotoxy(cols-30, rows);
     printf("U:%03d%% T:%1d C:%03d R:%05d/%05d",
-           eds == 0 ? 0 : u > 100 ? 100 : u, tw, col+1, currline(), lines);
+           (int)u, tw, col+1, currline(), lines);
     gotoxy(2, rows);
     statstr(stat); statstr(str);
     normvideo();

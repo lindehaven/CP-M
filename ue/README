@@ -177,6 +177,9 @@ Internals ---------------------------------------------------------------------
 
 Change History ----------------------------------------------------------------
 
+    1.26.5 Jan. 16, 2018. Lars Lindehaven
+    *   Fixed bug with incorrect status row.
+
     1.26.4 Jan. 12, 2018. Lars Lindehaven
     *   Added function to autoindent lines.
     *   Improved function for cutting/pasting text so that more text can be
