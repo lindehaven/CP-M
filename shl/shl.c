@@ -75,15 +75,18 @@ struct shl_type {
     char* mlc_end;
 };
 
-/* C/C++ keywords */
-char* shle_cpp[] = {".C", ".H", ".CPP", ".HPP", ".CC", NULL};
+/* C keywords */
+char* shle_cpp[] = {".C", ".H", NULL};
 char* shlk_cpp[] = {
-    "switch", "if", "while", "for", "break", "continue", "return",
-    "else", "struct", "union", "typedef", "static", "enum", "class",
-    "case", "#include", "volatile", "register", "sizeof", "typedef",
-    "union", "goto", "const", "auto", "#define", "#if", "#endif",
-    "#error", "#ifdef", "#ifndef", "#undef", "int", "long", "double",
-    "float", "char", "unsigned", "signed", "void", "bool",
+    "auto", "break", "case", "char", "const", "continue", "default", "do",
+    "double", "else", "enum", "extern", "float", "for", "goto", "if", "int",
+    "long", "register", "return", "short", "signed", "sizeof", "static",
+    "struct", "switch", "typedef", "union", "unsigned", "void", "volatile",
+    "while",
+    "#asm", "#define", "#elif", "#else", "#endasm", "#endif", "#error",
+    "#ifdef", "#ifndef", "#if", "#include", "#line", "#pragma", "#undef",
+    "__DATE__", "__FILE__", "__LINE__", "__STDC__", "__STDC_VERSION__",
+    "__TIME__",
     NULL
 };
 
@@ -151,48 +154,46 @@ char *lang_file;
  *  @buf_e Points to end of buffer.
  *  @buf_p Points to part of buffer where the printing shall start.
  *  @rows  Maximum number of rows to print.
- *  Returns SHL_DONE when done or SHL_FAIL if failed or language has not
- *  been set.
+ *  Returns number of parsed characters or SHL_FAIL if failed.
  */
 int shl_highlight(buf_b, buf_e, buf_p, rows)
 char *buf_b, *buf_e, *buf_p; int rows;
 {
-    int len, cur_row = 0;
+    int parsed = 0, len = 0, cur_row = 0;
     char *buf_s;
 
     if (shl_language == SHL_FAIL)
         return SHL_FAIL;
     else {
         buf_s = buf_b;
-        while (buf_b <= buf_e && cur_row < rows) {
+        while (buf_b < buf_e && cur_row < rows) {
             if (is_mlcs(buf_b) && state != SH_STR || state == SH_MLC) {
                 state = SH_MLC;
-                while (++buf_b <= buf_e && !is_mlce(buf_b))
+                while (++buf_b <= buf_e && !is_eol(buf_b) && !is_mlce(buf_b))
                     set_mlc(buf_b-1);
                 if (len = is_mlce(buf_b)) {
                     state = SH_MLC_END;
-                    clr_mlc(buf_b);
-                    while (++buf_b <= buf_e && len--)
-                        clr_mlc(buf_b);
+                    while (buf_b < buf_e && len--)
+                        clr_mlc(buf_b++);
                 }
             }
             else if (is_slc(buf_b) && state != SH_STR) {
                 state = SH_SLC;
-                while (++buf_b <= buf_e && !is_eol(buf_b))
-                    ;
+                while (buf_b < buf_e && !is_eol(buf_b))
+                    buf_b++;
             }
             else if (is_str(buf_b) && state != SH_SLC && state != SH_MLC) {
                 state = SH_STR;
-                while (++buf_b <= buf_e && !is_str(buf_b))
+                while (++buf_b <= buf_e && !is_eol(buf_b) && !is_str(buf_b))
                     ;
-                while (++buf_b <= buf_e && is_str(buf_b))
-                    ;
+                while (buf_b < buf_e && is_str(buf_b))
+                    buf_b++;
                 state = SH_STR_END;
             }
             else if (is_nums(buf_b) && state != SH_SLC && state != SH_MLC
                      && state != SH_STR) {
                 state = SH_NUM;
-                while (buf_b <= buf_e && is_numc(buf_b))
+                while (buf_b < buf_e && is_numc(buf_b))
                     buf_b++;
             }
             else if ((len = is_keyw(buf_b)) && state != SH_SLC
@@ -201,7 +202,7 @@ char *buf_b, *buf_e, *buf_p; int rows;
                 buf_b += len;
             }
             else if (is_eol(buf_b)) {
-                if (state == SH_SLC)
+                if (state == SH_SLC || state == SH_STR_END)
                     state = SH_PLAIN;
                 cur_row++;
                 buf_b++;
@@ -211,41 +212,43 @@ char *buf_b, *buf_e, *buf_p; int rows;
             }
             else {
                 state = SH_PLAIN;
-                buf_b++;
+                if (buf_b < buf_e)
+                    buf_b++;
             }
             if (buf_b > buf_p) {
                 switch (state) {
                     case SH_MLC :
                     case SH_MLC_END :
-                        shl_print(TE_MLC, buf_s, buf_b);
+                        shl_print(TE_MLC, buf_s, buf_b, buf_e);
                         break;
                     case SH_SLC :
-                        shl_print(TE_SLC, buf_s, buf_b);
+                        shl_print(TE_SLC, buf_s, buf_b, buf_e);
                         break;
                     case SH_STR :
                     case SH_STR_END :
-                        shl_print(TE_STR, buf_s, buf_b);
+                        shl_print(TE_STR, buf_s, buf_b, buf_e);
                         break;
                     case SH_NUM :
-                        shl_print(TE_NUM, buf_s, buf_b);
+                        shl_print(TE_NUM, buf_s, buf_b, buf_e);
                         break;
                     case SH_KEYW :
-                        shl_print(TE_KEYW, buf_s, buf_b);
+                        shl_print(TE_KEYW, buf_s, buf_b, buf_e);
                         break;
                     case SH_PLAIN :
-                        shl_print(TE_PLAIN, buf_s, buf_b);
+                        shl_print(TE_PLAIN, buf_s, buf_b, buf_e);
                         break;
                     default:
                         printf("%s", TE_RESET);
-                        fprintf(stderr, "\nInternal error! Unknown state\n");
+                        fprintf(stderr, "\nInternal error!\n");
                         return SHL_FAIL;
                         break;
                 }
             }
+            parsed += buf_b - buf_s;
             buf_s = buf_b;
         }
         printf("%s", TE_RESET);
-        return SHL_DONE;
+        return parsed;
     }
 }
 
@@ -253,14 +256,16 @@ char *buf_b, *buf_e, *buf_p; int rows;
  *  @marker Points to the highlighting marker for the terminal.
  *  @buf_s Points to the beginning of the string to print.
  *  @buf_b Points to the end of the string to print.
- *  Returns 0 when done.
+ *  @buf_e Points to end of buffer.
  */
-shl_print(marker, buf_s, buf_b) char *marker, *buf_s, *buf_b; {
+shl_print(marker, buf_s, buf_b, buf_e)
+char *marker, *buf_s, *buf_b, *buf_e;
+{
     char *buf_c;
 
     printf("%s", marker);
     buf_c = buf_s;
-    while (buf_c < buf_b) {
+    while (buf_c < buf_b && buf_c < buf_e) {
         if (*buf_c)
             putchar(*buf_c & 0x7f);
         buf_c++;
@@ -282,12 +287,16 @@ int is_mlcs(str) char *str; {
     char *look_p;
     int len = 0;
 
-    look_p = shl_data[shl_language].mlc_start;
-    len = strlen(look_p);
-    if (!strncmp(str, look_p, len) && str[-1] != '\\' || (str[0] & 0x80))
-        return len;
-    else
-        return 0;
+    if (str[0] & 0x80)
+        return 1;
+    else {
+        look_p = shl_data[shl_language].mlc_start;
+        len = strlen(look_p);
+        if (str[-1] != '\\' && !strncmp(str, look_p, len))
+            return len;
+        else
+            return 0;
+    }
 }
 
 /* Returns length of multi-line comment end or 0 if no match */
@@ -297,7 +306,7 @@ int is_mlce(str) char *str; {
 
     look_p = shl_data[shl_language].mlc_end;
     len = strlen(look_p);
-    if (!strncmp(str, look_p, len) && str[-1] != '\\')
+    if (str[-1] != '\\' && !strncmp(str, look_p, len))
         return len;
     else
         return 0;
@@ -310,7 +319,7 @@ int is_slc(str) char *str; {
 
     look_p = shl_data[shl_language].slc_start;
     len = strlen(look_p);
-    if (!strncmp(str, look_p, len) && str[-1] != '\\')
+    if (str[-1] != '\\' && !strncmp(str, look_p, len))
         return len;
     else
         return 0;

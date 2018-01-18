@@ -44,8 +44,7 @@ extern int shl_set_language();
  *  @buf_e Points to end of buffer.
  *  @buf_p Points to part of buffer where the printing shall start.
  *  @rows  Maximum number of rows to print.
- *  Returns SHL_DONE when done or SHL_FAIL if failed or language has not
- *  been set.
+ *  Returns number of parsed characters or SHL_FAIL if failed.
  */
 extern int shl_highlight();
 

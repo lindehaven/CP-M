@@ -1,6 +1,6 @@
 /*
     Lean Editor -- a small text editor for programmers.
-    Copyright (C) 2017 Lars Lindehaven
+    Copyright (C) 2017-2018 Lars Lindehaven
 
     Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
     Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware
