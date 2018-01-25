@@ -39,11 +39,12 @@
 #define SH_MLC      1
 #define SH_MLC_END  2
 #define SH_SLC      3
-#define SH_STR      4
-#define SH_STR_END  5
-#define SH_NUM      6
-#define SH_KEYW     7
-#define SH_PLAIN    8
+#define SH_SLC_END  4
+#define SH_STR      5
+#define SH_STR_END  6
+#define SH_NUM      7
+#define SH_KEYW     8
+#define SH_PLAIN    9
 
 #ifdef COLOR        /* Syntax highlighting with colors.     */
 #define TE_MLC      "\x1b[0;32m"    /* Green                */
@@ -111,23 +112,31 @@ struct shl_type shl_data[] = {
 
 #define SHL_LANGUAGES (sizeof(shl_data) / sizeof(shl_data[0]))
 
-int shl_language = SHL_FAIL;
-int state = SH_PLAIN;
+static int g_language = SHL_FAIL;
+static int g_state = SH_PLAIN;
+static int g_tab_stop = 8;
+static int g_column = 0;
+static int g_width = 32767;
 
-/* int shl_set_language(char *lang_file);
+void emit_str();
+void set_mlc();
+void clr_mlc();
+
+
+/* int shl_language(char *lang_file);
  * Sets the desired language for parsing and highlighting.
  *  @lang_file File name with file extension for the desired language.
  *  Returns SHL_DONE if language is supported or SHL_FAIL if language is
  *  not supported.
  */
-int shl_set_language(lang_file)
+int shl_language(lang_file)
 char *lang_file;
 {
     struct shl_type *shl_p;
     int lang_ix, ext_ix, ext_len;
     char* str_p = NULL;
 
-    state = SH_PLAIN;
+    g_state = SH_PLAIN;
     for (lang_ix = 0; lang_ix < SHL_LANGUAGES; lang_ix++) {
         shl_p = &shl_data[lang_ix];
         ext_ix = 0;
@@ -137,15 +146,54 @@ char *lang_file;
                 ext_len = strlen(shl_p->file_ext[ext_ix]);
                 if (shl_p->file_ext[ext_ix][0] == '.' &&
                     str_p[ext_len] == '\0') {
-                    shl_language = lang_ix;
+                    g_language = lang_ix;
                     return SHL_DONE;
                 }
             }
             ext_ix++;
         }
     }
-    shl_language = SHL_FAIL;
-    return shl_language;
+    g_language = SHL_FAIL;
+    return g_language;
+}
+
+/* int shl_tab_stop(int tab_stop);
+ * Sets the desired tab stop for emitting highlighted strings.
+ * @tab_stop Desired tab stop (tab width) in the range {1..8}. Default 8.
+ * Returns the set tab stop.
+ */
+int shl_tab_stop(tab_stop)
+int tab_stop;
+{
+    if (tab_stop >= 1 && tab_stop <= 8)
+        g_tab_stop = tab_stop;
+    return g_tab_stop;
+}
+
+/* int shl_width(int width);
+ * Sets the desired screen width for emitting highlighted strings.
+ * @width Desired width in the range {1..32767}. Default 32767.
+ * Returns the set width.
+ */
+int shl_width(width)
+int width;
+{
+    if (width >= 1 && width <= 32767)
+        g_width = width;
+    return g_width;
+}
+
+/* int shl_column(int column);
+ * Sets the desired column for emitting highlighted strings.
+ * @column Desired column in the range {0..32767}. Default 32767.
+ * Returns the set column.
+ */
+int shl_column(column)
+int column;
+{
+    if (column >= 0 && column <= 32767)
+        g_column = column;
+    return g_column;
 }
 
 /* int shl_highlight(char *buf_b, char *buf_e, char *buf_p, int rows);
@@ -160,82 +208,104 @@ int shl_highlight(buf_b, buf_e, buf_p, rows)
 char *buf_b, *buf_e, *buf_p; int rows;
 {
     int parsed = 0, len = 0, cur_row = 0;
-    char *buf_s;
+    char *buf_s, *tmp_w, *tmp_b = buf_b;
 
-    if (shl_language == SHL_FAIL)
+    if (g_language == SHL_FAIL)
         return SHL_FAIL;
     else {
         buf_s = buf_b;
-        while (buf_b < buf_e && cur_row < rows) {
-            if (is_mlcs(buf_b) && state != SH_STR || state == SH_MLC) {
-                state = SH_MLC;
-                while (++buf_b <= buf_e && !is_eol(buf_b) && !is_mlce(buf_b))
-                    set_mlc(buf_b-1);
-                if (len = is_mlce(buf_b)) {
-                    state = SH_MLC_END;
-                    while (buf_b < buf_e && len--)
-                        clr_mlc(buf_b++);
-                }
+        while (buf_b < buf_e) {
+            if (is_beg_mlc(buf_b) && g_state != SH_STR) {
+                g_state = SH_MLC;
+                while (buf_b < buf_e && !is_end_mlc(buf_b))
+                    set_mlc(buf_b++);
+                len = is_end_mlc(buf_b);
+                if (len)
+                    g_state = SH_MLC_END;
+                while (buf_b < buf_e && len--)
+                    set_mlc(buf_b++);
             }
-            else if (is_slc(buf_b) && state != SH_STR) {
-                state = SH_SLC;
+            else if (len = is_end_mlc(buf_b) && g_state != SH_STR) {
+                if (g_state == SH_MLC)
+                    g_state = SH_MLC_END;
+                while (buf_b < buf_e && len--)
+                    buf_b++;
+                tmp_w = buf_b;
+                while (tmp_w < buf_e && !is_set_mlc(tmp_w))
+                    clr_mlc(tmp_w++);
+            }
+            else if (is_slc(buf_b) && g_state != SH_STR) {
+                g_state = SH_SLC;
                 while (buf_b < buf_e && !is_eol(buf_b))
                     buf_b++;
+                g_state = SH_SLC_END;
             }
-            else if (is_str(buf_b) && state != SH_SLC && state != SH_MLC) {
-                state = SH_STR;
-                while (++buf_b <= buf_e && !is_eol(buf_b) && !is_str(buf_b))
+            else if (is_str(buf_b) && g_state != SH_SLC
+                     && g_state != SH_MLC) {
+                g_state = SH_STR;
+                while (++buf_b <= buf_e && !is_eol(buf_b)
+                       && !is_str(buf_b))
                     ;
                 while (buf_b < buf_e && is_str(buf_b))
                     buf_b++;
-                state = SH_STR_END;
+                g_state = SH_STR_END;
             }
-            else if (is_nums(buf_b) && state != SH_SLC && state != SH_MLC
-                     && state != SH_STR) {
-                state = SH_NUM;
+            else if (is_nums(buf_b) && g_state != SH_SLC
+                     && g_state != SH_MLC && g_state != SH_STR) {
+                g_state = SH_NUM;
                 while (buf_b < buf_e && is_numc(buf_b))
                     buf_b++;
             }
-            else if ((len = is_keyw(buf_b)) && state != SH_SLC
-                     && state != SH_MLC && state != SH_STR) {
-                state = SH_KEYW;
+            else if ((len = is_keyw(buf_b)) && g_state != SH_SLC
+                     && g_state != SH_MLC && g_state != SH_STR) {
+                g_state = SH_KEYW;
                 buf_b += len;
             }
             else if (is_eol(buf_b)) {
-                if (state == SH_SLC || state == SH_STR_END)
-                    state = SH_PLAIN;
                 cur_row++;
                 buf_b++;
+                if (g_state == SH_SLC || g_state == SH_STR_END)
+                    g_state = SH_PLAIN;
+                else if (g_state == SH_MLC) {
+                    while (buf_b < buf_e && !is_end_mlc(buf_b))
+                        set_mlc(buf_b++);
+                    len = is_end_mlc(buf_b);
+                    if (len)
+                        g_state = SH_MLC;
+                    while (buf_b < buf_e && len--)
+                        set_mlc(buf_b++);
+                }
             }
-            else if (state == SH_MLC_END) {
-                state = SH_PLAIN;
+            else if (g_state == SH_MLC_END) {
+                g_state = SH_PLAIN;
             }
             else {
-                state = SH_PLAIN;
+                g_state = SH_PLAIN;
                 if (buf_b < buf_e)
                     buf_b++;
             }
-            if (buf_b > buf_p) {
-                switch (state) {
+            if (buf_b > buf_p && cur_row < rows) {
+                switch (g_state) {
                     case SH_MLC :
                     case SH_MLC_END :
-                        shl_print(TE_MLC, buf_s, buf_b, buf_e);
+                        emit_str(TE_MLC, buf_s, buf_b, buf_e);
                         break;
                     case SH_SLC :
-                        shl_print(TE_SLC, buf_s, buf_b, buf_e);
+                    case SH_SLC_END :
+                        emit_str(TE_SLC, buf_s, buf_b, buf_e);
                         break;
                     case SH_STR :
                     case SH_STR_END :
-                        shl_print(TE_STR, buf_s, buf_b, buf_e);
+                        emit_str(TE_STR, buf_s, buf_b, buf_e);
                         break;
                     case SH_NUM :
-                        shl_print(TE_NUM, buf_s, buf_b, buf_e);
+                        emit_str(TE_NUM, buf_s, buf_b, buf_e);
                         break;
                     case SH_KEYW :
-                        shl_print(TE_KEYW, buf_s, buf_b, buf_e);
+                        emit_str(TE_KEYW, buf_s, buf_b, buf_e);
                         break;
                     case SH_PLAIN :
-                        shl_print(TE_PLAIN, buf_s, buf_b, buf_e);
+                        emit_str(TE_PLAIN, buf_s, buf_b, buf_e);
                         break;
                     default:
                         printf("%s", TE_RESET);
@@ -258,55 +328,80 @@ char *buf_b, *buf_e, *buf_p; int rows;
  *  @buf_b Points to the end of the string to print.
  *  @buf_e Points to end of buffer.
  */
-shl_print(marker, buf_s, buf_b, buf_e)
+void emit_str(marker, buf_s, buf_b, buf_e)
 char *marker, *buf_s, *buf_b, *buf_e;
 {
-    char *buf_c;
+    char *buf_c, ch;
 
     printf("%s", marker);
     buf_c = buf_s;
-    while (buf_c < buf_b && buf_c < buf_e) {
-        if (*buf_c)
-            putchar(*buf_c & 0x7f);
+    while (buf_c < buf_b && buf_c < buf_e && g_column < g_width) {
+        ch = *buf_c & 0x7f;
+        if (ch == '\r' || ch == '\n') {
+            putchar(ch);
+            g_column = 0;
+        } else if (ch == '\t') {
+            do
+                putchar(' ');
+            while (++g_column % g_tab_stop && g_column < g_width);
+        } else if (ch > 0 && ch < 0x7f) {
+            putchar(ch);
+            ++g_column;
+        }
         buf_c++;
     }
 }
 
 /* Set as multi-line comment */
-set_mlc(buf) char *buf; {
-    *buf = *buf | 0x80;
+void set_mlc(str) char *str; {
+    *str |= 0x80;
 }
 
 /* Clear multi-line comment */
-clr_mlc(buf) char *buf; {
-    *buf = *buf & 0x7f;
+void clr_mlc(str) char *str; {
+    *str &= 0x7f;
 }
 
-/* Returns length of multi-line comment start or 0 if no match */
-int is_mlcs(str) char *str; {
-    char *look_p;
-    int len = 0;
-
-    if (str[0] & 0x80)
-        return 1;
-    else {
-        look_p = shl_data[shl_language].mlc_start;
-        len = strlen(look_p);
-        if (str[-1] != '\\' && !strncmp(str, look_p, len))
-            return len;
-        else
-            return 0;
+/* Returns 1 if strings are equal or 0 if unequal. */
+int is_equ_str(str1, str2, len) char *str1, *str2; int len; {
+    char ch1, ch2;
+    int i;
+    
+    for (i = 0; i < len; i++) {
+        ch1 = str1[i] & 0x7f;
+        ch2 = str2[i] & 0x7f;
+        if (ch1 != ch2) break;
     }
+
+    return (i == len);
 }
 
-/* Returns length of multi-line comment end or 0 if no match */
-int is_mlce(str) char *str; {
+/* Returns length of multi-line comment beginning or 0 if no match. */
+int is_beg_mlc(str) char *str; {
     char *look_p;
     int len = 0;
 
-    look_p = shl_data[shl_language].mlc_end;
+    look_p = shl_data[g_language].mlc_start;
     len = strlen(look_p);
-    if (str[-1] != '\\' && !strncmp(str, look_p, len))
+    if (is_equ_str(str, look_p, len))
+        return len;
+    else
+        return 0;
+}
+
+/* Returns 1 if multi-line comment or 0 if no match. */
+int is_set_mlc(str) char *str; {
+    return str[0] & 0x80 ? 1 : 0;
+}
+
+/* Returns length of multi-line comment end or 0 if no match. */
+int is_end_mlc(str) char *str; {
+    char *look_p;
+    int len = 0;
+
+    look_p = shl_data[g_language].mlc_end;
+    len = strlen(look_p);
+    if (is_equ_str(str, look_p, len))
         return len;
     else
         return 0;
@@ -317,9 +412,9 @@ int is_slc(str) char *str; {
     char *look_p;
     int len = 0;
 
-    look_p = shl_data[shl_language].slc_start;
+    look_p = shl_data[g_language].slc_start;
     len = strlen(look_p);
-    if (str[-1] != '\\' && !strncmp(str, look_p, len))
+    if (is_equ_str(str, look_p, len))
         return len;
     else
         return 0;
@@ -330,10 +425,10 @@ int is_keyw(str) char *str; {
     char **look_p;
     int i, len = 0;
 
-    look_p = shl_data[shl_language].keywords;
+    look_p = shl_data[g_language].keywords;
     for (i = 0; look_p[i]; i++) {
         len = strlen(look_p[i]);
-        if (!strncmp(str, look_p[i], len)
+        if (is_equ_str(str, look_p[i], len)
             && is_sep(str[-1]) && is_sep(str[len]))
             return len;
     }
@@ -342,30 +437,37 @@ int is_keyw(str) char *str; {
 
 /* Returns 1 if string */
 int is_str(str) char *str; {
-    return (str[-1] != '\\' && str[0] == '\"');
+    char ch = str[0] & 0x7f;
+    char chp = str[-1] & 0x7f;
+    return (ch == '\"' && chp != '\\');
 }
 
 /* Returns 1 if numeric start */
 int is_nums(str) char *str; {
-    return (isdigit(str[0]) && is_sep(str[-1])
-            || str[0] == '.' && isdigit(str[1]));
+    char ch = str[0] & 0x7f;
+    char chp = str[-1] & 0x7f;
+    char chn = str[1] & 0x7f;
+    return (isdigit(ch) && is_sep(chp) || ch == '.' && isdigit(chn));
 }
 
 /* Returns 1 if numeric continues */
 int is_numc(str) char *str; {
-    char ch = tolower(*str);
+    char ch = str[0] & 0x7f;
     return (isdigit(ch) || ch == '.'
+            || ch == 'X' || (ch >= 'A' && ch <= 'F')
             || ch == 'x' || (ch >= 'a' && ch <= 'f'));
 }
 
 /* Returns 1 if separator character */
 int is_sep(ch) char ch; {
+    ch &= 0x7f;
     return (isspace(ch) || ch == '\0'
             || strchr(",.()+-/*=~%<>[]:;", ch) != NULL);
 }
 
 /* Returns 1 if end of line */
 int is_eol(str) char *str; {
-    return (str[0] == '\r' || str[0] == '\n' || str[0] == '\0');
+    char ch = str[0] & 0x7f;
+    return (ch == '\r' || ch == '\n' || ch == '\0');
 }
 

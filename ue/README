@@ -73,6 +73,15 @@ Search & Replace --------------------------------------------------------------
     search/replace mode and returns to edit mode.
 
 
+Syntax Highlighting -----------------------------------------------------------
+
+    To give more help for programmers, LE can be linked with the Syntax
+    Highlighter (SHL) module to highlight source code while editing. This
+    feature has been tested in the YAZE-AG simulator running on an Intel i5 at
+    2.6 GHz. However, the performance will probably be too low in a real CP/M 
+    environment with a Zilog Z80 or Intel Intel 8080 CPU running at a few MHz.
+
+
 Screen layout -----------------------------------------------------------------
 
     In case lines are too long to be displayed in full then the rightmost
@@ -176,6 +185,9 @@ Internals ---------------------------------------------------------------------
 
 
 Change History ----------------------------------------------------------------
+
+    1.27.0 Jan. 25, 2018. Lars Lindehaven
+    *   Added syntax highlighting.
 
     1.26.5 Jan. 16, 2018. Lars Lindehaven
     *   Fixed bug with incorrect status row.

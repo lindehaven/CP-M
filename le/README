@@ -9,13 +9,6 @@ Summary -----------------------------------------------------------------------
     80 characters. The reasons are to simplify the design of LE and
     that source code files should be small.
 
-    To give more help for programmers, LE can be linked with the
-    Syntax Highlighter (SHL) module to highlight source code while
-    editing. This feature has been tested in the YAZE-AG simulator
-    running on an Intel i5 at 2.6 GHz. However, the performance will
-    probably be too low in a real CP/M environment with a Zilog Z80 or
-    Intel Intel 8080 CPU running at a few MHz.
-
     NOTE! If ^S is pressed repeatedly then screen output may pause.
           Press ^Q once to unpause.
 

@@ -115,13 +115,6 @@ Source code files are limited to 2000 lines with lengths less than
 80 characters. The reasons are to simplify the design of LE and
 that source code files should be small.
 
-To give more help for programmers, LE can be linked with the
-Syntax Highlighter (SHL) module to highlight source code while
-editing. This feature has been tested in the YAZE-AG simulator
-running on an Intel i5 at 2.6 GHz. However, the performance will
-probably be too low in a real CP/M environment with a Zilog Z80 or
-Intel Intel 8080 CPU running at a few MHz. Just saying.
-
 See `le/README` file for details.
 
 ### Internals
@@ -178,6 +171,13 @@ Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
 ## Micro Editor (UE)
 
 ### Summary 
+
+To give more help for programmers, UE can be linked with the
+Syntax Highlighter (SHL) module to highlight source code while
+editing. This feature has been tested in the YAZE-AG simulator
+running on an Intel i5 at 2.6 GHz. However, the performance will
+probably be too low in a real CP/M environment with a Zilog Z80 or
+Intel Intel 8080 CPU running at a few MHz. Just saying.
 
 See `ue/README` file.
 

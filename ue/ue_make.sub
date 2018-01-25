@@ -1,4 +1,6 @@
 ; Build U Editor using AZTEC
-cc ue
+cc ue -DSHL
+;cc ue
 as ue.asm
-ln -o ue.com ue.o c.lib
+ln -o ue.com ue.o shl.o strstr.o strchr.o c.lib
+;ln -o ue.com ue.o c.lib

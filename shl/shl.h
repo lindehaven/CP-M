@@ -30,13 +30,34 @@
 #define SHL_FAIL    -1
 #define SHL_DONE    0
 
-/* int shl_set_language(char *lang_file);
+/* int shl_language(char *lang_file);
  * Sets the desired language for parsing and highlighting.
  *  @lang_file File name with file extension for the desired language.
  *  Returns SHL_DONE if language is supported or SHL_FAIL if language is
  *  not supported.
  */
-extern int shl_set_language();
+extern int shl_language();
+
+/* int shl_tab_stop(int tab_stop);
+ * Sets the desired tab stop for emitting highlighted strings.
+ * @tab_stop Desired tab stop (tab width) in the range {1..8}. Default 8.
+ * Returns the set tab stop.
+ */
+extern int shl_tab_stop();
+
+/* int shl_width(int width);
+ * Sets the desired screen width for emitting highlighted strings.
+ * @width Desired width in the range {1..32767}. Default 32767.
+ * Returns the set width.
+ */
+extern int shl_width();
+
+/* int shl_column(int column);
+ * Sets the desired column for emitting highlighted strings.
+ * @column Desired column in the range {0..32767}. Default 32767.
+ * Returns the set column.
+ */
+extern int shl_column();
 
 /* int shl_highlight(char *buf_b, char *buf_e, char *buf_p, int rows);
  * Parses buffer and prints highlighted string on screen.
@@ -47,4 +68,3 @@ extern int shl_set_language();
  *  Returns number of parsed characters or SHL_FAIL if failed.
  */
 extern int shl_highlight();
-

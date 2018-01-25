@@ -79,6 +79,9 @@ int main(argc, argv) int argc, argv[]; {
             es_tab = atoi(argv[2]);
             if (es_tab < MIN_ED_TABS || es_tab > MAX_ED_TABS)
                 es_tab = TERM_TABS;
+#ifdef SHL
+            shl_tab_stop(es_tab);
+#endif
         }
         if (strlen(argv[1]) > MAX_FNAME - 1) {
             fprintf(stderr, "Filename is too long.");
@@ -93,9 +96,11 @@ int main(argc, argv) int argc, argv[]; {
         return -1;
     }
 #ifdef SHL
-    es_shl = shl_set_language(fname);
-    if  (es_shl != SHL_FAIL)
-        shl_highlight(eb_arr[0], eb_arr[eb_tot], eb_arr[eb_tot], 0);
+    es_shl = shl_language(fname);
+    if  (es_shl != SHL_FAIL) {
+        shl_column(0);
+        shl_highlight(eb_arr[0], eb_arr[eb_tot], eb_arr[0], 0);
+    }
 #endif
     scrClr();
     edLoop();
@@ -312,6 +317,9 @@ edGetLine() {
                 es_tab++;
                 if (es_tab > MAX_ED_TABS)
                     es_tab = MIN_ED_TABS;
+#ifdef SHL
+                shl_tab_stop(es_tab);
+#endif
                 ++upd_sys;
                 ++upd_pos;
                 break;
@@ -441,14 +449,15 @@ edClear() {
 }
 
 edUpdate(row, line) int row, line; {
-    int i;
+    int i, len;
     for (i = row; i < ED_ROWS; ++i) {
         scrClrRow(ED_ROW1 + i);
         if (line < eb_tot) {
 #ifdef SHL
+          len = strlen(eb_arr[line]);
           if (es_shl >= 0)
             es_shl = shl_highlight(eb_arr[line],
-                                   eb_arr[line] + strlen(eb_arr[line]),
+                                   eb_arr[line] + len,
                                    eb_arr[line], 1);
           else
 #endif
