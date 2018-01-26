@@ -17,7 +17,7 @@ From Wikipedia:
 
 I wrote lots of code for CP/M in the early 80's. Basic, TurboPascal, C and
 assembly. My source code is unfortunately gone with the disks that I stored
-it on and with the computers I ran it on; a Spectravideo SV-328, a Jet 80 and 
+it on and with the computers I ran it on; a Spectravideo SV-328, a Jet 80 and
 a Bondwell BW-2. By 1995 I thought that I would not use CP/M again. UNIX and M$
 Windows had taken over.
 
@@ -44,20 +44,23 @@ want to have as much free memory in TPA as possible if the Syntax Highlighter
 is to be linked with a text editor.
 
 While developing the Lean Editor and Syntax Highlighter I found the micro
-editor [3] written for *nix. It is small and lean. I ported it to CP/M, added
-undo, added replace, and more. Working fine.
+editor [3] written for Linux. It is small and lean so I ported it to CP/M.
+Added undo, added replace, added auto-indentation and syntax highlighting.
+Working fine.
 
 ## References
 
   [1] Kilo editor (kilo) by Salvatore Sanfilippo ([antirez|https://github.com/antirez/kilo])
-  
+
   [2] Text editor (te) by Miguel I. García López ([MiguelVis|https://github.com/MiguelVis])
 
   [3] [Micro Editor (ue)|http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz] by Anthony Howe and Terry Loveall
 
 
 ## Binary Editor (BE)
-   
+
+![BE](https://github.com/lindehaven/CP-M/blob/master/images/be1.png)
+
 ### Summary
 
 Binary Editor (BE) enables hexadecimal and ASCII editing of binary
@@ -85,7 +88,7 @@ Save a backup of the original `BE.COM` before you start editing.
 
 See `be/README` file for details.
 
-### Internals 
+### Internals
 
 Copyright (c) 2017-2018 Lars Lindehaven.
 
@@ -107,8 +110,10 @@ A few modules that were missing in the Aztec C distribution.
 
 
 ## Lean Editor (LE)
-   
-### Summary 
+
+![LE](https://github.com/lindehaven/CP-M/blob/master/images/le1.png)
+
+### Summary
 
 Lean Editor (LE) enables easy editing of small source code files.
 Source code files are limited to 2000 lines with lengths less than
@@ -170,7 +175,9 @@ Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
 
 ## Micro Editor (UE)
 
-### Summary 
+![UE](https://github.com/lindehaven/CP-M/blob/master/images/ue1.png)
+
+### Summary
 
 To give more help for programmers, UE can be linked with the
 Syntax Highlighter (SHL) module to highlight source code while
@@ -181,7 +188,7 @@ Intel Intel 8080 CPU running at a few MHz. Just saying.
 
 See `ue/README` file.
 
-### Internals 
+### Internals
 
 Public Domain 2017-2018 (C) by Lars Lindehaven.
 
