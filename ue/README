@@ -76,10 +76,13 @@ Search & Replace --------------------------------------------------------------
 Syntax Highlighting -----------------------------------------------------------
 
     To give more help for programmers, LE can be linked with the Syntax
-    Highlighter (SHL) module to highlight source code while editing. This
-    feature has been tested in the YAZE-AG simulator running on an Intel i5 at
-    2.6 GHz. However, the performance will probably be too low in a real CP/M 
-    environment with a Zilog Z80 or Intel Intel 8080 CPU running at a few MHz.
+    Highlighter (SHL) module to highlight source code while editing.
+    
+    This feature has been tested in the YAZE-AG simulator running on different hardware platforms and operating systems with different performance:
+        *   Intel i5 @ 2.6 GHz with Windows 10 runs with fair performance.
+        *   Intel Celeron @ 1.7 GHz with Ubuntu 16 with lousy performance.
+    A hardware platform with a Zilog Z80 or Intel Intel 8080 CPU running at a
+    few MHz with CP/M will surely not be possible to run UE with SHL.
 
 
 Screen layout -----------------------------------------------------------------

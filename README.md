@@ -179,13 +179,6 @@ Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
 
 ### Summary
 
-To give more help for programmers, UE can be linked with the
-Syntax Highlighter (SHL) module to highlight source code while
-editing. This feature has been tested in the YAZE-AG simulator
-running on an Intel i5 at 2.6 GHz. However, the performance will
-probably be too low in a real CP/M environment with a Zilog Z80 or
-Intel Intel 8080 CPU running at a few MHz. Just saying.
-
 See `ue/README` file.
 
 ### Internals
