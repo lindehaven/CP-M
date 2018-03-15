@@ -50,11 +50,11 @@ Working fine.
 
 ## References
 
-  [1] Kilo editor (kilo) by Salvatore Sanfilippo ([antirez|https://github.com/antirez/kilo])
+  [1] Kilo editor (kilo) by Salvatore Sanfilippo ([antirez](https://github.com/antirez/kilo))
 
-  [2] Text editor (te) by Miguel I. García López ([MiguelVis|https://github.com/MiguelVis])
+  [2] Text editor (te) by Miguel I. García López ([MiguelVis](https://github.com/MiguelVis))
 
-  [3] [Micro Editor (ue)|http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz] by Anthony Howe and Terry Loveall
+  [3] Micro Editor ([ue](http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz)) by Anthony Howe and Terry Loveall
 
 
 ## Binary Editor (BE)
