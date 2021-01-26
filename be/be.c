@@ -565,8 +565,8 @@ int sysMsgKey(s) char *s; {
 
 /* Clear screen and send cursor to upper left corner. */
 scrClr() {
-    printf("\x1b[1;1H");
     printf("\x1b[2J");
+    printf("\x1b[H");
 }
 
 /* Move cursor to row, col */
