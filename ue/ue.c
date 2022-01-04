@@ -65,12 +65,12 @@
 #define KEY_FQUIT   ('Q' & 0x1f)    /* Quit */
 
 #ifdef SHL
-#define MAX_UNDO    2500
-#define EDIT_SIZE   25000
+#define MAX_UNDO    2100
+#define EDIT_SIZE   21000
 #define PASTE_SIZE  1000
 #else
-#define MAX_UNDO    3200
-#define EDIT_SIZE   32000
+#define MAX_UNDO    2800
+#define EDIT_SIZE   28000
 #define PASTE_SIZE  1000
 #endif
 #define UNDO_SIZE   MAX_UNDO*sizeof(U_REC)
