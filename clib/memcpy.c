@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2018 by Lars Lindehaven
+/* Copyright (C) 2017-2022 by Lars Lindehaven
  *  Copies n characters from memory area str2 to memory area str1.
  *  Returns pointer to destination, which is str1.
  */

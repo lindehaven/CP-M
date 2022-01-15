@@ -1,0 +1,6 @@
+; Build and run Syntax Highlighter test
+cc testshl.c
+as testshl.asm
+era testshl.asm
+ln -o testshl.com testshl.o shl.o strchr.o strstr.o c.lib
+testshl.com

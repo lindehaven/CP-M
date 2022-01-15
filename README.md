@@ -90,13 +90,13 @@ See `be/README` file for details.
 
 ### Internals
 
-Copyright (c) 2017-2018 Lars Lindehaven.
+Copyright (c) 2017-2022 Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
 *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
     Manx Software Systems
-*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+*   Tested on YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt
     and Andreas Gerlich.
 
 
@@ -124,13 +124,13 @@ See `le/README` file for details.
 
 ### Internals
 
-Copyright (c) 2017-2018 Lars Lindehaven.
+Copyright (c) 2017-2022 Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
 *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
     Manx Software Systems
-*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+*   Tested on YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt
     and Andreas Gerlich.
 
 Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
@@ -168,7 +168,7 @@ for example Lean Editor.
 
 ### Internals
 
-Copyright (C) 2017-2018 Lars Lindehaven
+Copyright (C) 2017-2022 Lars Lindehaven
 
 Work based on the Program Kilo editor, v0.1.1.
 Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
@@ -183,13 +183,13 @@ See `ue/README` file.
 
 ### Internals
 
-Public Domain 2017-2018 (C) by Lars Lindehaven.
+Public Domain 2017-2022 (C) by Lars Lindehaven.
 
 *   Digital Research CP/M systems
 *   ANSI terminal
 *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D by
     Manx Software Systems
-*   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+*   Tested on YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt
     and Andreas Gerlich.
 
 Work based on the Micro editor, v1.25 by Terry Loveall.

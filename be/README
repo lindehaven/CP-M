@@ -54,7 +54,7 @@ Internals ---------------------------------------------------------------------
     *   ANSI terminal
     *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
         by Manx Software Systems
-    *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+    *   Tested on YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt
         and Andreas Gerlich.
     
     Keyboard mapping can be easily changed without compiling the BE
@@ -68,7 +68,7 @@ Internals ---------------------------------------------------------------------
 
 License -----------------------------------------------------------------------
 
-    Copyright (C) 2017-2018 Lars Lindehaven. All rights reserved.
+    Copyright (C) 2017-2022 Lars Lindehaven. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are

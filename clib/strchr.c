@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2018 by Lars Lindehaven
+/* Copyright (C) 2017-2022 by Lars Lindehaven
  *  Searches for the first occurrence of the character c (an unsigned char) in
  *  the string pointed to by the argument str.
  *  Returns a pointer to the first occurence of the character n in the string

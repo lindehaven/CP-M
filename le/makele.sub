@@ -2,5 +2,6 @@
 cc le.c
 ;cc le.c -DSHL
 as le.asm
+era le.asm
 ln -o le.com le.o strstr.o c.lib
 ;ln -o le.com le.o shl.o strchr.o strstr.o c.lib

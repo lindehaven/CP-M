@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2018 by Lars Lindehaven
+/* Copyright (C) 2017-2022 by Lars Lindehaven
  *  Test of modules for Aztec C.
  */
 #include "stdio.h"

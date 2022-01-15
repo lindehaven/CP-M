@@ -1,7 +1,7 @@
 /*
  *  Binary Editor -- a small binary editor for programmers
  *
- *  Copyright (C) 2017 Lars Lindehaven
+ *  Copyright (C) 2017-2022 Lars Lindehaven
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without

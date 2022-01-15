@@ -1,7 +1,7 @@
 /*
     Micro Editor (ue)
 
-    Public Domain 2017-2018 (C) by Lars Lindehaven.
+    Public Domain 2017-2022 (C) by Lars Lindehaven.
     Public Domain 2002 (C) by Terry Loveall.
     Public Domain 1991 by Anthony Howe.  All rights released.
 

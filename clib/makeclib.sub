@@ -1,19 +1,20 @@
 ; Build Lars Lindehaven's modules for Aztec C
 ;------ memcpy --------
-r cpm/az106d/memcpy.c
 cc memcpy
 as memcpy.asm
+era memcpy.asm
 ;------ strchr --------
-r cpm/az106d/strchr.c
 cc strchr.c
 as strchr.asm
+era strchr.asm
 ;------ strstr --------
-r cpm/az106d/strstr.c
 cc strstr.c
 as strstr.asm
+era strstr.asm
+
 ;------ clibtest --------
-r cpm/az106d/clibtest.c
 cc clibtest.c
 as clibtest.asm
+era clibtest.asm
 ln -o clibtest.com clibtest.o memcpy.o strchr.o strstr.o c.lib
 clibtest.com

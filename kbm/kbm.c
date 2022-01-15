@@ -1,7 +1,7 @@
 /*
  * Keyboard Mapping
  *
- * Copyright (C) 2017-2018 Lars Lindehaven. All rights reserved.
+ * Copyright (C) 2017-2022 Lars Lindehaven. All rights reserved.
  */
 
 main(argc, argv) int argc, argv[];

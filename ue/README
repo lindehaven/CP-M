@@ -172,7 +172,7 @@ Internals ---------------------------------------------------------------------
     *   ANSI terminal
     *   Aztec C Compiler, 8080 Assembler and C Linker Vers. 1.06D
         by Manx Software Systems
-    *   Tested on YAZE-AG 2.40.2 by Frank D. Cringle, Michael Haardt
+    *   Tested on YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt
         and Andreas Gerlich.
 
     UE is small - less than 1000 lines of code and around 15 KB binary.
@@ -188,6 +188,9 @@ Internals ---------------------------------------------------------------------
 
 
 Change History ----------------------------------------------------------------
+
+    1.27.1 Jan. 15, 2022. Lars Lindehaven
+    *   Reduced file size to allow for 58KB TPA.
 
     1.27.0 Jan. 25, 2018. Lars Lindehaven
     *   Added syntax highlighting.

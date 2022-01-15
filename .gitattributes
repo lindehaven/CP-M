@@ -1,2 +1,10 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# CP/M files with these file extensions uses CR/LF
+*.sub text eol=crlf
+
+# CP/M files with these file extensions are binary
+*.com binary
+
+
