@@ -191,6 +191,14 @@ void normvideo() {
     printf("\x1b[27m");
 }
 
+void hidecur() {
+    printf("\x1b[?25l");
+}
+
+void showcur() {
+    printf("\x1b[?25h");
+}
+
 #asm
 ; int keyPressed(void);
     public keyPressed
@@ -609,6 +617,7 @@ void nop() {
 void display() {
     int r = 0, len = 0;
     char ch;
+    hidecur();
     if (editp < page)
         page = prevline(editp);
     if (epage <= editp) {
@@ -629,6 +638,7 @@ void display() {
     while (r++ <= rows-1) { clrtoeol(); gotoxy(1, r); }
     status(STAT_FILE, fname);
     gotoxy(col+1, row+1);
+    showcur();
 }
 
 void statstr(s) char *s; {

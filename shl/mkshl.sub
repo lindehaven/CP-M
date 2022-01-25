@@ -1,0 +1,13 @@
+; Build Syntax Highlighter using AZTEC
+
+cc shl.h
+
+; shlc.o (color)
+cc shl.c -DCOLOR
+as -ZAP shl.asm
+era shlc.o
+ren shlc.o=shl.o
+
+; shl.o
+cc shl.c
+as -ZAP shl.asm

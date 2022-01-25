@@ -36,7 +36,7 @@
 
 #define PROG_NAME   "Binary Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.4 2018-01-05"
+#define PROG_VERS   "v0.1.5 2022-01-21"
 #define PROG_SYST   "CP/M"
 
 #define WORDBITS    16                              /* # of bits in a word  */
@@ -164,7 +164,7 @@ int edLoop() {
         sysInfo();
         edPosCur();
         ch = keyPressed();
-        if (ch == 27 || ch == '?')
+        if (ch == 27)
             edHelp();
         else if (ch == *key[1])
             rowUp();
@@ -298,7 +298,9 @@ edUpd(fromrow, nrows) int fromrow, nrows; {
 
 /* Update editor screen from first row to last row */
 edUpdAll() {
+    scrHideCursor();
     edUpd(0, ED_ROWS);
+    scrShowCursor();
 }
 
 /* Display command help */
@@ -521,7 +523,7 @@ sysInfo() {
     scrNorVideo();
     printf(" %04x/%04x ", bcurr, bsize-1);
     if (eascii) printf("ASCII"); else printf("HEX  ");
-    printf("  Press ESC or ? for help");
+    printf("  Press ESC for help");
 }
 
 /* Print header on system line */
@@ -593,6 +595,16 @@ scrInvVideo() {
 /* Set normal video */
 scrNorVideo() {
     printf("\x1b[27m");
+}
+
+/* Hide cursor */
+scrHideCursor() {
+    printf("\x1b[?25l");
+}
+
+/* Show cursor */
+scrShowCursor() {
+    printf("\x1b[?25h");
 }
 
 /* CP/M KEYBOARD ---------------------------------------------------------- */

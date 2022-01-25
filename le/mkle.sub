@@ -1,0 +1,13 @@
+; Build Lean Editor AZTEC
+
+; Plain
+cc le.c
+as -ZAP le.asm
+ln -o le.com le.o c.lib
+
+; With highlighting
+mkshl.sub
+cc le.c -DSHL
+as -ZAP le.asm
+ln -o leshl.com le.o shl.o strstr.o strchr.o c.lib
+ln -o leshlc.com le.o shlc.o strstr.o strchr.o c.lib

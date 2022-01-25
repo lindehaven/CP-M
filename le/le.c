@@ -450,6 +450,7 @@ edClear() {
 
 edUpdate(row, line) int row, line; {
     int i, len;
+    scrHideCursor();
     for (i = row; i < ED_ROWS; ++i) {
         scrClrRow(ED_ROW1 + i);
         if (line < eb_tot) {
@@ -465,6 +466,7 @@ edUpdate(row, line) int row, line; {
             line++;
         }
     }
+    scrShowCursor();
 }
 
 int tabToSpaces() {
@@ -991,6 +993,13 @@ scrClrEol() {
     printf("\x1b[K");
 }
 
+scrHideCursor() {
+    printf("\x1b[?25l");
+}
+
+scrShowCursor() {
+    printf("\x1b[?25h");
+}
 
 /* CP/M KEYBOARD INPUT */
 

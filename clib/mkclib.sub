@@ -1,0 +1,15 @@
+; Build Lars Lindehaven's modules for Aztec C
+;------ memcpy --------
+cc memcpy
+as -ZAP memcpy.asm
+;------ strchr --------
+cc strchr.c
+as -ZAP strchr.asm
+;------ strstr --------
+cc strstr.c
+as -ZAP strstr.asm
+;------ tstclib --------
+cc tstclib.c
+as -ZAP tstclib.asm
+ln -o tstclib.com tstclib.o memcpy.o strchr.o strstr.o c.lib
+tstclib.com
