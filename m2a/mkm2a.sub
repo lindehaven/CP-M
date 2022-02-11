@@ -1,0 +1,4 @@
+; Build Markdown to ANSI using AZTEC
+cc m2a
+as -ZAP m2a.asm
+ln -o m2a.com m2a.o strstr.o c.lib

@@ -1,0 +1,108 @@
+[7m[4m[1m Lean Editor 
+[0m
+[3mA small text editor for programmers[23m
+
+
+[7m[21m[1m Summary 
+[0m
+Lean Editor (LE) enables easy editing of small source code files.
+Source code files are limited to 2000 lines with lengths less than
+80 characters. The reasons are to simplify the design of LE and
+that source code files should be small.
+
+[3m[1mNOTE![23m[22m
+  If ^S is pressed repeatedly then screen output may pause.
+  Press ^Q once to unpause.
+
+
+[7m[21m[1m Screen Layout 
+[0m
+The first row on top of the screen is called the status row.
+It displays:
+
+[0m[1m-[22m F: filename
+[0m[1m-[22m P: number of lines in the paste buffer
+[0m[1m-[22m E: number of edits that have been made
+[0m[1m-[22m T: tab width
+[0m[1m-[22m R: current row / last row
+[0m[1m-[22m C: current column / last column
+
+[3mExample[23m
+    [1mF:LE.C                       P:04  E:00056  T:4  R:0094/1000  C:09/68[22m
+
+If an incremental string search is active then it is shown instead
+of the file name:
+
+[0m[1m-[22m   S   incremental search string
+
+[3mExample[23m
+    [1mS:for (i =                   P:00  E:00119  T:4  R:0382/1000  C:21/52[22m
+
+
+[7m[21m[1m Navigation Keys 
+[0m
+    ^E      Cursor one row up
+    ^X      Cursor one row down
+    ^S      Cursor one column left
+    ^D      Cursor one column right
+    ^A      Cursor one word left
+    ^F      Cursor one word right
+    ^J      Cursor to beginning of line
+    ^K      Cursor to end of line
+    ^R      Cursor one page up
+    ^C      Cursor one page down
+    ^T      Cursor to beginning of file 
+    ^V      Cursor to end of file
+    ^Z      Center current row
+    ^L      Search string incrementally (look)
+
+
+[7m[21m[1m Editing Keys 
+[0m
+    ^U      Change tab width
+    ^I      Insert tab (Tab)
+    ^M      Insert new line (Return)
+    ^G      Delete character to the right (Delete)
+    ^H      Delete character to the left (Backspace)
+    ^O      Move line to paste buffer
+    ^P      Insert line(s) from paste buffer
+    ^Y      Move line up
+    ^B      Move line down
+
+
+[7m[21m[1m File Command Keys 
+[0m
+    ^W      Write to file
+    ^Q      Quit
+
+
+[7m[21m[1m Internals 
+[0m
+[0m[1m-[22m Digital Research CP/M systems
+[0m[1m-[22m ANSI terminal
+[0m[1m-[22m Aztec C Compiler Vers. 1.06D by Manx Software Systems
+[0m[1m-[22m YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt and Andreas Gerlich
+
+
+[7m[21m[1m License 
+[0m[3m
+    Copyright (C) 2017-2022 Lars Lindehaven.
+
+    Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
+    Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License as
+    published by the free Software Foundation; either version 2, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+[23m
+[0m

@@ -1,0 +1,74 @@
+[7m[4m[1m Syntax Highlighter 
+[0m
+[3mPrints highlighted source code[23m
+
+
+[7m[21m[1m Summary 
+[0m
+Parses and prints a byte buffer with highlighting of syntax for the
+selected language.
+
+The language is selected by calling [1mshl_select_language()[22m with the
+name of a file as argument.
+
+[3mExample: Select the C language[23m
+    [1mshl_select_language("EXAMPLE.C")[22m
+
+The parsing and printing highlighted strings are performed by calling
+[1mshl_highlight()[22m with appropriate arguments.
+
+[0m[1m-[22m Keywords for the language, ex: [1mif[22m, [1mthen[22m, [1melse[22m, [1mreturn[22m
+[0m[1m-[22m Single-line comments, ex: [1m// single-line comment[22m
+[0m[1m-[22m Multi-line comments, ex: [1m/* multi-line comment */[22m
+[0m[1m-[22m Strings, ex: [1m"this is a string"[22m
+[0m[1m-[22m Numeric constants, ex: [1m3.14159[22m, [1m0xFACE[22m, [1m.01[22m
+
+Languages need to be defined in shl.c, there is no reading of
+language definition files (yet).
+
+Possible to parse and print none, parts or all of the byte buffer so that
+the CPU load can be kept to a minimum.
+
+Keeps state of multi-line comments to enable faster parsing in editors,
+for example Lean Editor.
+
+
+[7m[21m[1m Internals 
+[0m
+[0m[1m-[22m Digital Research CP/M systems
+[0m[1m-[22m ANSI terminal
+[0m[1m-[22m Aztec C Compiler Vers. 1.06D by Manx Software Systems
+[0m[1m-[22m YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt and Andreas Gerlich
+
+
+[7m[21m[1m License 
+[0m[3m
+    Copyright (C) 2017-2022 Lars Lindehaven.
+
+    Work based on the Program Kilo editor, v0.1.1.
+    Copyright (c) 2016, Salvatore Sanfilippo <antirez at gmail dot com>
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+      Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+      
+      Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+      
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+[23m
+[0m
