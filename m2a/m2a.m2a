@@ -1,0 +1,61 @@
+[7m[4m[1m Markdown to ANSI (M2A)
+[0m
+[7m[21m[1m Summary 
+[0m
+M2A converts and prints markdown code to ANSI screen codes. I wrote it to get
+better readability of markdown files on an ANSI terminal. I use it to convert
+my markdown files and supply the ANSI-coded files for my CP/M programs.
+I give the ANSI-coded files the extension [1m.M2A[22m.
+
+[3mExample[23m
+  [1mM2A.COM < M2A.MD > M2A.M2A[22m
+
+The ANSI-code files then looks ok when dumping them on an ANSI screen.
+[3mExample[23m
+  [1mTYPE M2A.M2A[22m
+
+M2A supports the following markdown:
+
+[0m[1m-[22m Headings
+[0m[1m-[22m Block quotes
+[0m[1m-[22m Code blocks
+[0m[1m-[22m Unordered lists
+[0m[1m-[22m Inline code
+[0m[1m-[22m Emphasized text
+
+
+[7m[21m[1m Internals 
+[0m
+[0m[1m-[22m Digital Research CP/M systems
+[0m[1m-[22m ANSI terminal
+[0m[1m-[22m Aztec C Compiler Vers. 1.06D by Manx Software Systems
+[0m[1m-[22m YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt and Andreas Gerlich
+
+[7m[21m[1m License 
+[0m[3m
+    Copyright (C) 2022 Lars Lindehaven. All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+      Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+      
+      Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+      
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+[23m
+[0m
