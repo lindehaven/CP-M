@@ -1,4 +1,4 @@
-; Build Lean Editor AZTEC
+; Build Lean Editor using Aztec C Compiler
 
 ; Plain
 cc le.c

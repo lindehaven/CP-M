@@ -25,29 +25,34 @@ ___NOTE!___
   Press ^Q once to unpause.
 
 
+## Help Key
+
+    ^J      Show help about key controls.
+
+
 ## Navigation Keys 
 
-    ^E      Cursor one row up
-    ^X      Cursor one row down
-    ^S      Cursor one column left
-    ^D      Cursor one column right
-    ^R      Cursor one page up
-    ^C      Cursor one page down
-    ^T      Cursor to beginning of byte buffer (top)
-    ^V      Cursor to end of byte buffer (bottom)
+    ^E      Cursor one row up.
+    ^X      Cursor one row down.
+    ^S      Cursor one column left.
+    ^D      Cursor one column right.
+    ^R      Cursor one page up.
+    ^C      Cursor one page down.
+    ^T      Cursor to beginning of byte buffer (top).
+    ^V      Cursor to end of byte buffer (bottom).
 
 
 ## Editing Keys 
 
-    ^A      Set edit mode HEX
-    ^F      Set edit mode ASCII
-    ^Z      Toggle edit mode (ASCII/HEX)
+    ^A      Set edit mode HEX.
+    ^F      Set edit mode ASCII.
+    ^Z      Toggle edit mode (ASCII/HEX).
 
 
 ## File Command Keys 
 
-    ^W      Write buffer to file (save)
-    ^Q      Quit
+    ^W      Write buffer to file (save).
+    ESC     Quit program.
 
 
 ## Internals 

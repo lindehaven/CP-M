@@ -36,7 +36,7 @@
 
 #define PROG_NAME   "Binary Editor"
 #define PROG_AUTH   "Lars Lindehaven"
-#define PROG_VERS   "v0.1.5 2022-01-21"
+#define PROG_VERS   "v0.1.6 2022-09-13"
 #define PROG_SYST   "CP/M"
 
 #define WORDBITS    16                              /* # of bits in a word  */
@@ -73,6 +73,7 @@
 /* CP/M Keyboard */
 char *key[] = {
     "L.Lindehaven",
+    "\x0a",                 /* ^J  Help                                     */
     "\x05",                 /* ^E  Cursor one row up                        */
     "\x18",                 /* ^X  Cursor one row down                      */
     "\x13",                 /* ^S  Cursor one column left                   */
@@ -85,27 +86,26 @@ char *key[] = {
     "\x06",                 /* ^F  Set edit mode ASCII                      */
     "\x1a",                 /* ^Z  Toggle edit mode (ASCII/HEX)             */
     "\x17",                 /* ^W  Write byte buffer to file (save)         */
-    "\x11",                 /* ^Q  Quit                                     */
+    "\x1b",                 /* ESC Quit                                     */
     "\x00",                 /* Reserved for future use                      */
     "\x00",                 /* Reserved for future use                      */
-    "\x00"                  /* Reserved for future use                      */
 };
 
 char *help[] = {
-   "^E Row up      ",
-   "^X Row down    ",
-   "^S Column left ",
-   "^D Column right",
-   "^R Page up     ",
-   "^C Page down   ",
-   "^T Top         ",
-   "^V Bottom      ",
-   "^A HEX mode    ",
-   "^F ASCII mode  ",
-   "^Z Toggle mode ",
-   "^W Write file  ",
-   "^Q Quit        ",
-   "               ",
+   "^J  Help (this)",
+   "^E  Row up     ",
+   "^X  Row down   ",
+   "^S  Col left   ",
+   "^D  Col right  ",
+   "^R  Page up    ",
+   "^C  Page down  ",
+   "^T  Top        ",
+   "^V  Bottom     ",
+   "^A  HEX mode   ",
+   "^F  ASCII mode ",
+   "^Z  Toggle mode",
+   "^W  Write file ",
+   "ESC Quit       ",
    "               ",
    "               "
 };
@@ -164,36 +164,36 @@ int edLoop() {
         sysInfo();
         edPosCur();
         ch = keyPressed();
-        if (ch == 27)
+        if (ch == *key[1])
             edHelp();
-        else if (ch == *key[1])
-            rowUp();
         else if (ch == *key[2])
+            rowUp();
+        else if (ch == *key[3])
             rowDown();
-        else if (ch == *key[3] || ch == 127)
+        else if (ch == *key[4] || ch == 127)
             colLeft();
-        else if (ch == *key[4] || ch == 9)
+        else if (ch == *key[5] || ch == 9)
             colRight();
-        else if (ch == *key[5])
-            pageUp();
         else if (ch == *key[6])
-            pageDown();
+            pageUp();
         else if (ch == *key[7])
-            buffTop();
+            pageDown();
         else if (ch == *key[8])
-            buffBottom();
+            buffTop();
         else if (ch == *key[9])
-            eascii = 0;
+            buffBottom();
         else if (ch == *key[10])
-            eascii = 1;
+            eascii = 0;
         else if (ch == *key[11])
-            eascii ^= 1;
+            eascii = 1;
         else if (ch == *key[12])
+            eascii ^= 1;
+        else if (ch == *key[13])
             fileWrite();
-        else if (ch == *key[13]) {
+        else if (ch == *key[14]) {
             fileQuit();
             return 0;
-        /* *key[14], *key[15] and *key[16] are reserved */
+        /* *key[15] and *key[16] are free to use */
         }
         else
             edInput(ch);
@@ -523,7 +523,7 @@ sysInfo() {
     scrNorVideo();
     printf(" %04x/%04x ", bcurr, bsize-1);
     if (eascii) printf("ASCII"); else printf("HEX  ");
-    printf("  Press ESC for help");
+    printf("  Press ^J for help");
 }
 
 /* Print header on system line */

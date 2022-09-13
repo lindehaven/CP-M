@@ -1,6 +1,6 @@
 /*
     Lean Editor -- a small text editor for programmers.
-    Copyright (C) 2017-2018 Lars Lindehaven
+    Copyright (C) 2017-2022 Lars Lindehaven
 
     Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
     Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware
@@ -41,6 +41,7 @@
 #define KEY_FEND     22     /* ^V       Cursor to end of file               */
 #define KEY_CENTER   26     /* ^Z       Center current row                  */
 #define KEY_SEARCH   12     /* ^L       Search string incrementally (look)  */
+#define KEY_SCREEN   17     /* ^Q       Unpause screen output               */
 
 /* Editing ---------------------------------------------------------------- */
 #define KEY_TABW     21     /* ^U       Change tab width                    */
@@ -56,5 +57,5 @@
 
 /* File commands ---------------------------------------------------------- */
 #define KEY_FSAVE    23     /* ^W       Write to file                       */
-#define KEY_FQUIT    17     /* ^Q       Quit                                */
-
+#define KEY_FQUIT    27     /* ESC      Escape (save and quit)              */
+

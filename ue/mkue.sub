@@ -1,4 +1,4 @@
-; Build U Editor using AZTEC
+; Build U Editor using Aztec C Compiler
 
 ; Plain
 cc ue.c

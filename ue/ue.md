@@ -9,7 +9,8 @@ code files are limited in size to fit into the transient program area
 
 ___NOTE!___
     If ^S is pressed repeatedly then screen output may pause. 
-    Press ^Q once to unpause.
+    Press ^Q once to unpause screen output.
+    Press ^Q again to refresh the screen.
 
 
 ## Command Line Options 
@@ -70,17 +71,16 @@ search/replace mode and returns to edit mode.
 
 ## Syntax Highlighting 
 
-To give more help for programmers, LE can be linked with the Syntax
+To give more help for programmers, UE can be linked with the Syntax
 Highlighter (SHL) module to highlight source code while editing.
-   
+
 This feature has been tested in the YAZE-AG simulator running on different
-hardware platforms and operating systems with different performance:
+hardware platforms and operating systems. Using UE with SHL on a hardware
+platform with a 4MHz CPU is not recommended (and not usable).
 
-* Intel i5 @ 2.6 GHz with Windows 10 runs with fair performance.
-* Intel Celeron @ 1.7 GHz with Ubuntu 16 with lousy performance.
-
-A hardware platform with a Zilog Z80 or Intel Intel 8080 CPU running at a
-few MHz with CP/M will surely not be possible to run UE with SHL.
+In order to reduce the CPU load, the highlighting of multi-line comments is
+not continuously updated while typing. However, by pressing ^Q the edit
+buffer is parsed completely and the source code is highlighted on the screen.
 
 
 ## Screen layout 
@@ -131,6 +131,7 @@ _Example_
     ^C      Cursor one page down.
     ^T      Cursor to beginning of file.
     ^V      Cursor to end of file.
+    ^Q      Unpause screen output and update screen.
     ^L      Search string incrementally. Looks for search string in the
             edit buffer and marks it with inverse video. Wraps when
             reached the end of the edit buffer.
@@ -156,7 +157,7 @@ _Example_
     ^W      Write to file. Saves the edit buffer to file with a carriage
             return '\r' and a new line '\n' as end of line. Empties the
             undo and paste buffers.
-    ^Q      Quit. Exits the program if no changes have been made or the
+    ESC     Escape. Exits the program if no changes have been made or the
             user does not want to save changes.
 
 
@@ -209,3 +210,4 @@ _
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 _
+

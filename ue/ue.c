@@ -36,33 +36,34 @@
 #include "shl.h"
 #endif
 
-#define KEY_RUP     ('E' & 0x1f)    /* Cursor one row up */
-#define KEY_RDN     ('X' & 0x1f)    /* Cursor one row down */
-#define KEY_CLT     ('S' & 0x1f)    /* Cursor one column left */
-#define KEY_CRT     ('D' & 0x1f)    /* Cursor one column right */
+#define KEY_FQUIT   (0x1b)          /* Escape (save and quit) */
 #define KEY_WLT     ('A' & 0x1f)    /* Cursor one word left */
-#define KEY_WRT     ('F' & 0x1f)    /* Cursor one word right */
-#define KEY_LBEG    ('J' & 0x1f)    /* Cursor to beginning of line */
-#define KEY_LEND    ('K' & 0x1f)    /* Cursor to end of line */
-#define KEY_PUP     ('R' & 0x1f)    /* Cursor one page up */
+#define KEY_LMVDN   ('B' & 0x1f)    /* Move line down */
 #define KEY_PDN     ('C' & 0x1f)    /* Cursor one page down */
-#define KEY_FBEG    ('T' & 0x1f)    /* Cursor to beginning of file */
-#define KEY_FEND    ('V' & 0x1f)    /* Cursor to end of file */
-#define KEY_SRCH    ('L' & 0x1f)    /* Search string incrementally */
-#define KEY_TABW    ('U' & 0x1f)    /* Change tab width */
-#define KEY_TAB     ('\t')          /* Insert tab */
-#define KEY_LINS    ('\r')          /* Insert new line */
+#define KEY_CRT     ('D' & 0x1f)    /* Cursor one column right */
+#define KEY_RUP     ('E' & 0x1f)    /* Cursor one row up */
+#define KEY_WRT     ('F' & 0x1f)    /* Cursor one word right */
 #define KEY_DEL     ('G' & 0x1f)    /* Delete character to the right */
 #define KEY_RUB     ('H' & 0x1f)    /* Delete character to the left */
-#define KEY_BS      (0x7f)          /* Delete character to the left */
+#define KEY_TAB     ('I' & 0x1f)    /* Insert tab */
+#define KEY_LBEG    ('J' & 0x1f)    /* Cursor to beginning of line */
+#define KEY_LEND    ('K' & 0x1f)    /* Cursor to end of line */
+#define KEY_SRCH    ('L' & 0x1f)    /* Search string incrementally */
+#define KEY_LINS    ('M' & 0x1f)    /* Insert new line */
+#define KEY_REPL    ('N' & 0x1f)    /* Replace string incrementally */
 #define KEY_CUT     ('O' & 0x1f)    /* Cut to end of line */
 #define KEY_PASTE   ('P' & 0x1f)    /* Paste */
-#define KEY_LMVUP   ('Y' & 0x1f)    /* Move line up */
-#define KEY_LMVDN   ('B' & 0x1f)    /* Move line down */
-#define KEY_REPL    ('N' & 0x1f)    /* Replace string incrementally */
-#define KEY_UNDO    ('Z' & 0x1f)    /* Undo last character insert/delete */
+#define KEY_SCREEN  ('Q' & 0x1f)    /* Unpause output and refresh screen */
+#define KEY_PUP     ('R' & 0x1f)    /* Cursor one page up */
+#define KEY_CLT     ('S' & 0x1f)    /* Cursor one column left */
+#define KEY_FBEG    ('T' & 0x1f)    /* Cursor to beginning of file */
+#define KEY_TABW    ('U' & 0x1f)    /* Change tab width */
+#define KEY_FEND    ('V' & 0x1f)    /* Cursor to end of file */
 #define KEY_FSAVE   ('W' & 0x1f)    /* Write to file */
-#define KEY_FQUIT   ('Q' & 0x1f)    /* Quit */
+#define KEY_RDN     ('X' & 0x1f)    /* Cursor one row down */
+#define KEY_LMVUP   ('Y' & 0x1f)    /* Move line up */
+#define KEY_UNDO    ('Z' & 0x1f)    /* Undo last character insert/delete */
+#define KEY_BS      (0x7f)          /* Delete character to the left */
 
 #ifdef SHL
 #define MAX_UNDO    2100
@@ -146,6 +147,7 @@ void fquit();
 void nop();
 void display();
 void status();
+void screen();
 
 char key[] = { 
     KEY_RUP,    KEY_RDN,    KEY_CLT,    KEY_CRT,
@@ -154,7 +156,7 @@ char key[] = {
     KEY_SRCH,   KEY_REPL,   KEY_TABW,   KEY_DEL,
     KEY_RUB,    KEY_BS,     KEY_CUT,    KEY_PASTE,
     KEY_LMVUP,  KEY_LMVDN,  KEY_UNDO,   KEY_FSAVE,
-    KEY_FQUIT,
+    KEY_FQUIT,  KEY_SCREEN,
     '\0'
 };
 
@@ -165,7 +167,7 @@ void (*func[])() = {
     sarstr,     sarstr,     inctw,      del,
     rub,        rub,        cut,        paste,
     lmvup,      lmvdn,      undo,       fsave,
-    fquit,
+    fquit,      screen,
     nop
 };
 
@@ -198,6 +200,7 @@ void hidecur() {
 void showcur() {
     printf("\x1b[?25h");
 }
+
 
 #asm
 ; int keyPressed(void);
@@ -614,6 +617,14 @@ void fquit() {
 void nop() {
 }
 
+void screen() {
+#ifdef SHL
+    shl_clear(editbuf, endp);
+    shl_highlight(editbuf, endp, endp, 0);
+#endif
+    display();
+}
+
 void display() {
     int r = 0, len = 0;
     char ch;
@@ -702,3 +713,4 @@ int main(argc, argv) int argc, argv[]; {
         return 0;
     }
 }
+

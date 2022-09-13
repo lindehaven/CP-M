@@ -12,7 +12,8 @@ that source code files should be small.
 
 ___NOTE!___
   If ^S is pressed repeatedly then screen output may pause.
-  Press ^Q once to unpause.
+  Press ^Q once to unpause screen output.
+  Press ^Q again to refresh the screen.
 
 
 ## Screen Layout 
@@ -41,39 +42,42 @@ _Example_
 
 ## Navigation Keys 
 
-    ^E      Cursor one row up
-    ^X      Cursor one row down
-    ^S      Cursor one column left
-    ^D      Cursor one column right
-    ^A      Cursor one word left
-    ^F      Cursor one word right
-    ^J      Cursor to beginning of line
-    ^K      Cursor to end of line
-    ^R      Cursor one page up
-    ^C      Cursor one page down
-    ^T      Cursor to beginning of file 
-    ^V      Cursor to end of file
-    ^Z      Center current row
-    ^L      Search string incrementally (look)
-
+    ^E      Cursor one row up.
+    ^X      Cursor one row down.
+    ^S      Cursor one column left.
+    ^D      Cursor one column right.
+    ^A      Cursor one word left.
+    ^F      Cursor one word right.
+    ^J      Cursor to beginning of line.
+    ^K      Cursor to end of line.
+    ^R      Cursor one page up.
+    ^C      Cursor one page down.
+    ^T      Cursor to beginning of file.
+    ^V      Cursor to end of file.
+    ^Z      Center current row.
+    ^Q      Unpause screen output and update screen.
+    ^L      Search string incrementally. Looks for search string in the
+            edit buffer and marks it with inverse video. Wraps when
+            reached the end of the edit buffer.
 
 ## Editing Keys 
 
-    ^U      Change tab width
-    ^I      Insert tab (Tab)
-    ^M      Insert new line (Return)
-    ^G      Delete character to the right (Delete)
-    ^H      Delete character to the left (Backspace)
-    ^O      Move line to paste buffer
-    ^P      Insert line(s) from paste buffer
-    ^Y      Move line up
-    ^B      Move line down
+    ^U      Change tab width. Can be 1-8 spaces.
+    ^I      Insert tab (Tab).
+    ^M      Insert new line (Enter).
+    ^G      Delete character to the right (Delete).
+    ^H      Delete character to the left (Backspace).
+    ^O      Cut complete line. Move line to paste buffer.
+    ^P      Paste. Insert line(s) from paste buffer.
+    ^Y      Move line up.
+    ^B      Move line down.
 
 
 ## File Command Keys 
 
-    ^W      Write to file
-    ^Q      Quit
+    ^W      Write to file. Saves the edit buffer to file.
+    ESC     Escape. Exits the program if no changes have been made or the
+            user does not want to save changes.
 
 
 ## Internals 
@@ -99,9 +103,4 @@ _
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
-_
+    GNU General Public License for m

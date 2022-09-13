@@ -25,29 +25,34 @@ or discarded when exiting BE.
   Press ^Q once to unpause.
 
 
+[7m[21m[1m Help Key
+[0m
+    ^J      Show help about key controls.
+
+
 [7m[21m[1m Navigation Keys 
 [0m
-    ^E      Cursor one row up
-    ^X      Cursor one row down
-    ^S      Cursor one column left
-    ^D      Cursor one column right
-    ^R      Cursor one page up
-    ^C      Cursor one page down
-    ^T      Cursor to beginning of byte buffer (top)
-    ^V      Cursor to end of byte buffer (bottom)
+    ^E      Cursor one row up.
+    ^X      Cursor one row down.
+    ^S      Cursor one column left.
+    ^D      Cursor one column right.
+    ^R      Cursor one page up.
+    ^C      Cursor one page down.
+    ^T      Cursor to beginning of byte buffer (top).
+    ^V      Cursor to end of byte buffer (bottom).
 
 
 [7m[21m[1m Editing Keys 
 [0m
-    ^A      Set edit mode HEX
-    ^F      Set edit mode ASCII
-    ^Z      Toggle edit mode (ASCII/HEX)
+    ^A      Set edit mode HEX.
+    ^F      Set edit mode ASCII.
+    ^Z      Toggle edit mode (ASCII/HEX).
 
 
 [7m[21m[1m File Command Keys 
 [0m
-    ^W      Write buffer to file (save)
-    ^Q      Quit
+    ^W      Write buffer to file (save).
+    ESC     Quit program.
 
 
 [7m[21m[1m Internals 
@@ -93,4 +98,4 @@ Save a backup of the original BE.COM before you start editing.
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 [23m
-[0m
+[0m

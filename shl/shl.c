@@ -36,20 +36,23 @@
 
 /* DEFINITIONS ------------------------------------------------------------ */
 
-#define SH_MLC      1
+#define SH_PLAIN    0	/* Plain text that is not any of the following:     */
+#define SH_MLC      1   /* Multi-line comment as defined in shl_data.       */
 #define SH_MLC_END  2
-#define SH_SLC      3
+#define SH_SLC      3   /* Single line comment as defined in shl_data.      */
 #define SH_SLC_END  4
-#define SH_STR      5
-#define SH_STR_END  6
-#define SH_NUM      7
-#define SH_KEYW     8
-#define SH_PLAIN    9
+#define SH_SQS      5   /* Single quote string, ex: 'She said: "No way!"'   */
+#define SH_SQS_END  6
+#define SH_DQS      7   /* Double quote string, ex: "It's time to go."      */
+#define SH_DQS_END  8
+#define SH_NUM      9   /* Numeric, ex: 123, 4.5, 0xef                      */
+#define SH_KEYW     10  /* Keyword as defined in shlk_* structures.         */
 
 #ifdef COLOR        /* Syntax highlighting with colors.     */
 #define TE_MLC      "\x1b[0;32m"    /* Green                */
 #define TE_SLC      "\x1b[0;32m"    /* Green                */
-#define TE_STR      "\x1b[0;36m"    /* Normal Cyan          */
+#define TE_SQS      "\x1b[0;36m"    /* Normal Cyan          */
+#define TE_DQS      "\x1b[0;36m"    /* Normal Cyan          */
 #define TE_NUM      "\x1b[0;31m"    /* Normal Red           */
 #define TE_KEYW     "\x1b[1;34m"    /* Bold Blue            */
 #define TE_PLAIN    "\x1b[0;35m"    /* Normal Magenta       */
@@ -57,7 +60,8 @@
 #else               /* Syntax highlighting with attributes. */
 #define TE_MLC      "\x1b[2m"       /* Faint                */
 #define TE_SLC      "\x1b[2m"       /* Faint                */
-#define TE_STR      "\x1b[3m"       /* Italics              */
+#define TE_SQS      "\x1b[3m"       /* Italics              */
+#define TE_DQS      "\x1b[3m"       /* Italics              */
 #define TE_NUM      "\x1b[4m"       /* Underline            */
 #define TE_KEYW     "\x1b[1m"       /* Bold                 */
 #define TE_PLAIN    "\x1b[0m"       /* Plain                */
@@ -71,9 +75,9 @@ typedef char bool;
 struct shl_type {
     char** file_ext;
     char** keywords;
-    char* slc_start;
-    char* mlc_start;
-    char* mlc_end;
+    char*  slc_start;
+    char*  mlc_start;
+    char*  mlc_end;
 };
 
 /* C keywords */
@@ -91,7 +95,7 @@ char* shlk_cpp[] = {
     NULL
 };
 
-/* CP/M Plus commands*/
+/* CP/M Plus commands */
 char* shle_sub[] = {".SUB", NULL};
 char* shlk_sub[] = {
     "COPYSYS", "DATE", "DEVICE", "DIR", "DIRS", "DUMP", "ED", "ERA", "ERASE",
@@ -106,8 +110,9 @@ char* shlk_sub[] = {
 };
 
 struct shl_type shl_data[] = {
-    { shle_cpp, shlk_cpp, "//", "/*", "*/"},
-    { shle_sub, shlk_sub, ";",  "", ""}
+   /* extensions, keywords, single cmt,  multi-cmt, multi-cmt end */
+    { shle_cpp,   shlk_cpp, "//"      ,  "/*"     , "*/"          },
+    { shle_sub,   shlk_sub, ";"       ,  ""       , ""            }
 };
 
 #define SHL_LANGUAGES (sizeof(shl_data) / sizeof(shl_data[0]))
@@ -196,6 +201,24 @@ int column;
     return g_column;
 }
 
+/* int shl_clear(char *buf_b, char *buf_e);
+ * Clears buffer from highlighting markers (msb).
+ *  @buf_b Points to beginning of buffer.
+ *  @buf_e Points to end of buffer.
+ *  Returns number of cleared characters.
+ */
+int shl_clear(buf_b, buf_e)
+char *buf_b, *buf_e;
+{
+    int cleared = 0;
+
+    while (buf_b < buf_e) {
+        clr_mlc(buf_b++);
+        cleared++;
+    }
+    return cleared;
+}
+
 /* int shl_highlight(char *buf_b, char *buf_e, char *buf_p, int rows);
  * Parses buffer and prints highlighted string on screen.
  *  @buf_b Points to beginning of buffer.
@@ -215,7 +238,8 @@ char *buf_b, *buf_e, *buf_p; int rows;
     else {
         buf_s = buf_b;
         while (buf_b < buf_e) {
-            if (is_beg_mlc(buf_b) && g_state != SH_STR) {
+            if ((is_set_mlc(buf_b) || is_beg_mlc(buf_b))
+                     && g_state != SH_SQS && g_state != SH_DQS) {
                 g_state = SH_MLC;
                 while (buf_b < buf_e && !is_end_mlc(buf_b))
                     set_mlc(buf_b++);
@@ -225,7 +249,8 @@ char *buf_b, *buf_e, *buf_p; int rows;
                 while (buf_b < buf_e && len--)
                     set_mlc(buf_b++);
             }
-            else if (len = is_end_mlc(buf_b) && g_state != SH_STR) {
+            else if (len = is_end_mlc(buf_b)
+                     && g_state != SH_SQS && g_state != SH_DQS) {
                 if (g_state == SH_MLC)
                     g_state = SH_MLC_END;
                 while (buf_b < buf_e && len--)
@@ -234,37 +259,49 @@ char *buf_b, *buf_e, *buf_p; int rows;
                 while (tmp_w < buf_e && !is_set_mlc(tmp_w))
                     clr_mlc(tmp_w++);
             }
-            else if (is_slc(buf_b) && g_state != SH_STR) {
+            else if (is_slc(buf_b)
+                     && g_state != SH_SQS && g_state != SH_DQS) {
                 g_state = SH_SLC;
                 while (buf_b < buf_e && !is_eol(buf_b))
                     buf_b++;
                 g_state = SH_SLC_END;
             }
-            else if (is_str(buf_b) && g_state != SH_SLC
-                     && g_state != SH_MLC) {
-                g_state = SH_STR;
-                while (++buf_b <= buf_e && !is_eol(buf_b)
-                       && !is_str(buf_b))
+            else if (is_sqs(buf_b) && g_state != SH_DQS
+                     && g_state != SH_SLC && g_state != SH_MLC) {
+                g_state = SH_SQS;
+                while (++buf_b <= buf_e && !is_eol(buf_b) && !is_sqs(buf_b))
                     ;
-                while (buf_b < buf_e && is_str(buf_b))
+                while (buf_b < buf_e && is_sqs(buf_b))
                     buf_b++;
-                g_state = SH_STR_END;
+                g_state = SH_SQS_END;
             }
-            else if (is_nums(buf_b) && g_state != SH_SLC
-                     && g_state != SH_MLC && g_state != SH_STR) {
+            else if (is_dqs(buf_b) && g_state != SH_SQS
+                     && g_state != SH_SLC && g_state != SH_MLC) {
+                g_state = SH_DQS;
+                while (++buf_b <= buf_e && !is_eol(buf_b) && !is_dqs(buf_b))
+                    ;
+                while (buf_b < buf_e && is_dqs(buf_b))
+                    buf_b++;
+                g_state = SH_DQS_END;
+            }
+            else if (is_nums(buf_b)
+                     && g_state != SH_SLC && g_state != SH_MLC
+                     && g_state != SH_SQS && g_state != SH_DQS) {
                 g_state = SH_NUM;
                 while (buf_b < buf_e && is_numc(buf_b))
                     buf_b++;
             }
-            else if ((len = is_keyw(buf_b)) && g_state != SH_SLC
-                     && g_state != SH_MLC && g_state != SH_STR) {
+            else if ((len = is_keyw(buf_b))
+                     && g_state != SH_SLC && g_state != SH_MLC
+                     && g_state != SH_SQS && g_state != SH_DQS) {
                 g_state = SH_KEYW;
                 buf_b += len;
             }
             else if (is_eol(buf_b)) {
                 cur_row++;
                 buf_b++;
-                if (g_state == SH_SLC || g_state == SH_STR_END)
+                if (g_state == SH_SLC
+                    || g_state == SH_SQS_END || g_state == SH_DQS_END)
                     g_state = SH_PLAIN;
                 else if (g_state == SH_MLC) {
                     while (buf_b < buf_e && !is_end_mlc(buf_b))
@@ -294,9 +331,13 @@ char *buf_b, *buf_e, *buf_p; int rows;
                     case SH_SLC_END :
                         emit_str(TE_SLC, buf_s, buf_b, buf_e);
                         break;
-                    case SH_STR :
-                    case SH_STR_END :
-                        emit_str(TE_STR, buf_s, buf_b, buf_e);
+                    case SH_SQS :
+                    case SH_SQS_END :
+                        emit_str(TE_SQS, buf_s, buf_b, buf_e);
+                        break;
+                    case SH_DQS :
+                    case SH_DQS_END :
+                        emit_str(TE_DQS, buf_s, buf_b, buf_e);
                         break;
                     case SH_NUM :
                         emit_str(TE_NUM, buf_s, buf_b, buf_e);
@@ -372,7 +413,6 @@ int is_equ_str(str1, str2, len) char *str1, *str2; int len; {
         ch2 = str2[i] & 0x7f;
         if (ch1 != ch2) break;
     }
-
     return (i == len);
 }
 
@@ -435,11 +475,18 @@ int is_keyw(str) char *str; {
     return 0;
 }
 
-/* Returns 1 if string */
-int is_str(str) char *str; {
-    char ch = str[0] & 0x7f;
+/* Returns 1 if single-quote string */
+int is_sqs(str) char *str; {
     char chp = str[-1] & 0x7f;
-    return (ch == '\"' && chp != '\\');
+    char ch = str[0] & 0x7f;
+    return (chp != 0x5c && ch == 0x27);
+}
+
+/* Returns 1 if double-quoted string */
+int is_dqs(str) char *str; {
+    char chp = str[-1] & 0x7f;
+    char ch = str[0] & 0x7f;
+    return (chp != 0x5c && ch == 0x22);
 }
 
 /* Returns 1 if numeric start */
