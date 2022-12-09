@@ -35,32 +35,35 @@ used it a few times when inspecting files saved by other programs.
 Continued with an attempt to port the Kilo editor [1] to CP/M because I wanted
 a source code editor with syntax highlighting. But I soon discovered that the
 Kilo editor was using too much of the 62 KB TPA so I decided to write an editor
-that uses less memory. Based most of my design and code on the Text editor [2]
-that works well in CP/M. I took away functions that I don't need (new file,
-open file, save file as) and added some that I do need (incremental search,
-move line up/down, cut/paste lines). That became the Lean Editor.
+that uses less memory.
 
 Also wrote the Syntax Highlighter that is a variant of the syntax highlighting
 from Kilo editor [1]. I focused on reducing the memory requirements because I
 want to have as much free memory in TPA as possible if the Syntax Highlighter
 is to be linked with a text editor.
 
-While developing the Lean Editor and Syntax Highlighter I found the micro
-editor [3] written for Linux. It is small and lean so I ported it to CP/M.
-Added undo, added replace, added auto-indentation and syntax highlighting.
-Working fine.
+While developing the Syntax Highlighter I found the micro editor [2] written
+for Linux. It is small and lean so I ported it to CP/M. Added undo, added
+replace, added auto-indentation and syntax highlighting. Working fine.
+
+Although the micro editor works fine in a CP/M emulator, it is way too slow for
+use on an actual Intel 8080 or Zilog Z80 running on a few MHz. So, my pursuit
+for a faster code editor with syntax highlighting continues.
+
+At the time of writing, I'm working on extending a fork of the TED editor [3]
+with Zilog Z80 assembly syntax highlighting - in Zilog Z80 assembly of course.
+
 
 ## References
 
   [1] Kilo editor (kilo) by Salvatore Sanfilippo
       ([antirez](https://github.com/antirez/kilo))
 
-  [2] Text editor (te) by Miguel I. García López
-      ([MiguelVis](https://github.com/MiguelVis))
-
-  [3] Micro Editor by Anthony Howe and Terry Loveall
+  [2] Micro Editor by Anthony Howe and Terry Loveall
       ([ue](http://web.archive.org/web/20081019042406/http://www.modest-proposals.com/binary/ue.1.25.tgz)) 
 
+  [3] TED editor by Hector Peraza
+      ([hperaza](https://github.com/hperaza/TED))
 
 ## Binary Editor (BE)
 
@@ -110,30 +113,47 @@ A few modules that were missing in the Aztec C distribution.
 * `strstr.c`
 
 
-## Lean Editor (LE)
-
-![LE](https://github.com/lindehaven/CP-M/blob/master/images/le1.png)
+## Markdown to ANSI (M2A)
 
 ### Summary
 
-Lean Editor (LE) enables easy editing of small source code files. Source code
-files are limited to 2000 lines with lengths less than 80 characters. The
-reasons are to simplify the design of LE and that source code files should be
-small.
+M2A converts and prints markdown code to ANSI screen codes. I wrote it to get
+better readability of markdown files on an ANSI terminal. I use it to convert
+my markdown files and supply the ANSI-coded files for my CP/M programs.
+I give the ANSI-coded files the extension `.M2A`.
+Example: `M2A.COM < M2A.MD > M2A.M2A`
 
-See `le/le.md` or `le/le.m2a` for details.
+The ANSI-code files then looks ok when dumping them on an ANSI screen.
+Example: `TYPE M2A.M2A`
+
+M2A supports the following markdown:
+
+* Headings
+* Block quotes
+* Code blocks
+* Unordered lists
+* Inline code
+* Emphasized text
+
 
 ### Internals
 
-Copyright (c) 2017-2022 Lars Lindehaven.
+Public domain (C) 2022 Lars Lindehaven
 
 * Digital Research CP/M systems
 * ANSI terminal
 * Aztec C Compiler Vers. 1.06D by Manx Software Systems
 * YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt and Andreas Gerlich
 
-Work based on the Program Text editor (te) v1.08 from 05 Jul 2017.
-Copyright (c) 2015-2016 Miguel Garcia / FloppySoftware.
+### Summary
+
+See `m2a/m2a.md` or `m2a/m2a.m2a` for details.
+
+
+## Screen
+
+Small utility to set background and foreground colors on an ANSI terminal.
+Written in C.
 
 
 ## Syntax Highlighter (SHL)
@@ -192,40 +212,3 @@ Public Domain 2002 (C) by Terry Loveall.
 Public Domain 1991 by Anthony Howe.  All rights released.
 
 See `ue/ue.md` or `ue/ue.m2a` for details.
-
-
-## Markdown to ANSI (M2A)
-
-### Summary
-
-M2A converts and prints markdown code to ANSI screen codes. I wrote it to get
-better readability of markdown files on an ANSI terminal. I use it to convert
-my markdown files and supply the ANSI-coded files for my CP/M programs.
-I give the ANSI-coded files the extension `.M2A`.
-Example: `M2A.COM < M2A.MD > M2A.M2A`
-
-The ANSI-code files then looks ok when dumping them on an ANSI screen.
-Example: `TYPE M2A.M2A`
-
-M2A supports the following markdown:
-
-* Headings
-* Block quotes
-* Code blocks
-* Unordered lists
-* Inline code
-* Emphasized text
-
-
-### Internals
-
-Public domain (C) 2022 Lars Lindehaven
-
-* Digital Research CP/M systems
-* ANSI terminal
-* Aztec C Compiler Vers. 1.06D by Manx Software Systems
-* YAZE-AG 2.51.1 by Frank D. Cringle, Michael Haardt and Andreas Gerlich
-
-### Summary
-
-See `m2a/m2a.md` or `m2a/m2a.m2a` for details.

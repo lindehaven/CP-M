@@ -1,0 +1,5 @@
+; Build GREEN.COM with AZTEC
+cc screen.c
+as -ZAP screen.asm
+ln -o screen.com screen.o c.lib
+era screen.o
